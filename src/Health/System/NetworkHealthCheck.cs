@@ -14,7 +14,7 @@ namespace YA.ServiceTemplate.Health.System
     /// Checks network-related values of the application.
     /// </summary>
     public class NetworkHealthCheck : IHealthCheck
-    {
+    { 
         public NetworkHealthCheck(ILogger<NetworkHealthCheck> logger, IOptionsMonitor<NetworkCheckOptions> options)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
