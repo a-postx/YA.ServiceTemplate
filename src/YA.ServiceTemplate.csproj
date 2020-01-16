@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup Label="Build">
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <LangVersion>latest</LangVersion>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TieredCompilation>true</TieredCompilation>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <Version>0.3.0</Version>
+    <Authors>Alexey Yakubin</Authors>
+    <Company>Delobytes</Company>
+    <Product>YA.ServiceTemplate</Product>
+    <Description>Distributed web-API service template</Description>
+    <Copyright></Copyright>
+    <PackageId>Delobytes.YA.ServiceTemplate</PackageId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup Label="Package References">
+    <PackageReference Include="Amazon.Extensions.Configuration.SystemsManager" Version="1.2.0" />
+    <PackageReference Include="Ben.Demystifier" Version="0.1.4" />
+    <PackageReference Include="CorrelationId" Version="2.1.0" />
+    <PackageReference Include="Delobytes.AspNetCore" Version="1.4.2" />
+    <PackageReference Include="Delobytes.AspNetCore.Swagger" Version="2.2.0" />
+    <PackageReference Include="Delobytes.Mapper" Version="1.1.0" />
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="5.5.5" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="5.5.5" />
+    <PackageReference Include="MassTransit.SerilogIntegration" Version="5.5.5" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServicesIntegration" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="4.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.4.43" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Enrichers.MassTransitMessage" Version="1.0.2" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="5.4.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.4" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Debug" Version="1.0.1" />
+    <PackageReference Include="Serilog.Sinks.Logzio" Version="1.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes></PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Connected Services\" />
+    <Folder Include="Infrastructure\Caching\" />
+  </ItemGroup>
+
+</Project>

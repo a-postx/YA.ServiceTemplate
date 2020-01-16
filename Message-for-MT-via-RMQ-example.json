@@ -1,0 +1,15 @@
+{
+  "messageId": "59020000-5dba-0015-10b8-08d77ec28593",
+  "requestId": "59020000-5dba-0015-5674-08d77ec28592",
+  "conversationId": "59020000-5dba-0015-bca8-08d77ec28594",
+  "correlationId": "c7ff562a-b639-415b-9add-c9e524a727cc",
+  "destinationAddress": "rabbitmq://bear.rmq.cloudamqp.com/aelzlsta/ya.servicetemplate.receiveendpoint",
+  "headers": {},
+  "messageType": [
+    "urn:message:MbMessages:IDoSomethingMessageV1"
+  ],
+  "message": {
+    "correlationId": "c7ff562a-b639-415b-9add-c9e524a727cc",
+    "value": "Hello"
+  }
+}
