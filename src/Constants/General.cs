@@ -4,7 +4,6 @@
     {
         public const int SystemShutdownTimeoutSec = 60;
         public const string AppDataFolderName = "AppData";
-        public const string DefaultHttpUserAgent = "YA/1.0";
         public const string AppHttpUserAgent = "YA.ServiceTemplate/1.0";
         public const string CorrelationIdHeader = "X-Correlation-ID";
         public const string MessageBusServiceHealthCheckName = "message_bus_service";

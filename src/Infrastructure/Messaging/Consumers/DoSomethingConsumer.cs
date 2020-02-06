@@ -1,5 +1,6 @@
 ﻿using MassTransit;
 using MbMessages;
+using System;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages;
@@ -10,7 +11,7 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging.Consumers
     {
         public DoSomethingConsumer(IDoSomethingMessageHandler doSomethingMessageHandler)
         {
-            _doSomethingMessageHandler = doSomethingMessageHandler;
+            _doSomethingMessageHandler = doSomethingMessageHandler ?? throw new ArgumentNullException(nameof(doSomethingMessageHandler));
         }
 
         private readonly IDoSomethingMessageHandler _doSomethingMessageHandler;

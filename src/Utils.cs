@@ -1,16 +1,15 @@
-﻿using Newtonsoft.Json;
-using YA.ServiceTemplate.Constants;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Linq;
-using Microsoft.Extensions.Logging;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace YA.ServiceTemplate
 {
@@ -106,7 +105,7 @@ namespace YA.ServiceTemplate
             return result;
         }
 
-        public static HttpClient GetHttpClient(string userAgent = General.DefaultHttpUserAgent, int requestTimeout = 60)
+        public static HttpClient GetHttpClient(string userAgent = "YA/1.0", int requestTimeout = 60)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);

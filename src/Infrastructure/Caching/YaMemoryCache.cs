@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace YA.ServiceTemplate.Infrastructure.Caching
 {
-    public class YaMemoryCache<T>
+    public class YaMemoryCache
     {
         private MemoryCache _cache;
 
@@ -13,11 +13,11 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
             _cache = new MemoryCache(options);
         }
 
-        public async Task<(bool created, T)> GetOrCreateAsync(object key, Func<Task<T>> createItem, MemoryCacheEntryOptions options)
+        public async Task<(bool created, T type)> GetOrCreateAsync<T>(object key, Func<Task<T>> createItem, MemoryCacheEntryOptions options) where T : class
         {
-            bool appEventExists = _cache.TryGetValue(key, out T cacheEntry);
+            bool itemExists = _cache.TryGetValue(key, out T cacheEntry);
 
-            if (!appEventExists)
+            if (!itemExists)
             {
                 T newItem = await createItem();
 
@@ -33,11 +33,17 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
             }
         }
 
-        public T Set(object key, T cacheEntry, MemoryCacheEntryOptions options) => _cache.Set(key, cacheEntry, options);
+        public T Set<T>(object key, T cacheEntry, MemoryCacheEntryOptions options) where T : class
+        {
+            return _cache.Set(key, cacheEntry, options) as T;
+        }
 
-        public T Get(object key) => (T)_cache.Get(key);
+        public T Get<T>(object key) where T : class
+        {
+            return (T)_cache.Get(key);
+        }
 
-        public T Update(object key, T newCacheEntry, MemoryCacheEntryOptions options)
+        public T Update<T>(object key, T newCacheEntry, MemoryCacheEntryOptions options) where T : class
         {
             _cache.Remove(key);
             return _cache.Set(key, newCacheEntry, options);

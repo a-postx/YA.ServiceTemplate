@@ -8,7 +8,7 @@ using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.Dto;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Infrastructure.Caching
+namespace YA.ServiceTemplate.Application
 {
     /// <summary>
     /// Track API request state.
@@ -16,7 +16,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
     /// </summary>
     public class ApiRequestTracker : IApiRequestTracker
     {
-        public ApiRequestTracker(ILogger<ApiRequestTracker> logger, ApiRequestMemoryCache apiRequestCache, IAppRepository apiRequestRepository)
+        public ApiRequestTracker(ILogger<ApiRequestTracker> logger, IApiRequestMemoryCache apiRequestCache, IAppRepository apiRequestRepository)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _apiRequestCache = apiRequestCache ?? throw new ArgumentNullException(nameof(apiRequestCache));
@@ -24,7 +24,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
         }
 
         private readonly ILogger<ApiRequestTracker> _log;
-        private readonly ApiRequestMemoryCache _apiRequestCache;
+        private readonly IApiRequestMemoryCache _apiRequestCache;
         private readonly IAppRepository _apiRequestRepository;
         
         public async Task<(bool created, ApiRequest request)> GetOrCreateRequestAsync(Guid correlationId, string method, CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
             {
                 if (request != null)
                 {
-                    _apiRequestCache.Add(request);
+                    _apiRequestCache.Add(request, request.ApiRequestId);
                     return (false, request);
                 }
                 else
@@ -48,7 +48,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
 
                     ApiRequest createdRequest = await _apiRequestRepository.CreateApiRequestAsync(newApiRequest);
 
-                    _apiRequestCache.Add(newApiRequest);
+                    _apiRequestCache.Add(newApiRequest, newApiRequest.ApiRequestId);
 
                     return (true, createdRequest);
                 }
@@ -57,7 +57,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
 
         private async Task<(bool requestFoundInCache, ApiRequest request)> GetFromCacheOrDbAsync(Guid correlationId, CancellationToken cancellationToken)
         {
-            ApiRequest requestFromCache = _apiRequestCache.GetApiRequestFromCache(correlationId);
+            ApiRequest requestFromCache = _apiRequestCache.GetApiRequestFromCache<ApiRequest>(correlationId);
                 
             if (requestFromCache == null)
             {
@@ -88,7 +88,7 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
             
             await _apiRequestRepository.UpdateApiRequestAsync(request);
 
-            _apiRequestCache.Update(request);
+            _apiRequestCache.Update(request, request.ApiRequestId);
         }
     }
 }

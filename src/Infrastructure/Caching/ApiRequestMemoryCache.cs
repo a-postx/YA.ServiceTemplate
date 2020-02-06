@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading.Tasks;
+using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
-using YA.ServiceTemplate.Core.Entities;
 
 namespace YA.ServiceTemplate.Infrastructure.Caching
 {
-    public class ApiRequestMemoryCache : YaMemoryCache<ApiRequest>
+    public class ApiRequestMemoryCache : YaMemoryCache, IApiRequestMemoryCache
     {
         public ApiRequestMemoryCache()
         {
@@ -18,27 +18,27 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
                     .SetSize(1)
                     .SetPriority(CacheItemPriority.High)
                     .SetSlidingExpiration(TimeSpan.FromSeconds(General.ApiRequestCacheSlidingExpirationSec))
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(General.ApiRequestCacheAbsoluteExpirationSec));            
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(General.ApiRequestCacheAbsoluteExpirationSec));
 
-        public async Task<(bool created, ApiRequest request)> GetOrCreateAsync(object key, Func<Task<ApiRequest>> createItem)
+        public async Task<(bool created, T request)> GetOrCreateAsync<T>(Guid key, Func<Task<T>> createItem) where T : class
         {
-            (bool created, ApiRequest request) result = await base.GetOrCreateAsync(key, createItem, _cacheOptions);
+            (bool created, T request) result = await base.GetOrCreateAsync(key, createItem, _cacheOptions);
             return result;
         }
 
-        public void Add(ApiRequest request)
+        public void Add<T>(T request, Guid key) where T : class
         {
-            base.Set(request.ApiRequestId, request, _cacheOptions);
-        }
-        
-        public ApiRequest GetApiRequestFromCache(object key)
-        {
-            return base.Get(key);
+            base.Set(key, request, _cacheOptions);
         }
 
-        internal void Update(ApiRequest request)
+        public T GetApiRequestFromCache<T>(Guid key) where T : class
         {
-            base.Update(request.ApiRequestId, request, _cacheOptions);
+            return base.Get<T>(key);
+        }
+
+        public void Update<T>(T request, Guid key) where T : class
+        {
+            base.Update(key, request, _cacheOptions);
         }
     }
 }

@@ -159,7 +159,7 @@ namespace YA.ServiceTemplate
 
             services.AddScoped<ApiRequestFilter>();
             services.AddScoped<IApiRequestTracker, ApiRequestTracker>();
-            services.AddSingleton<ApiRequestMemoryCache>();
+            services.AddSingleton<IApiRequestMemoryCache, ApiRequestMemoryCache>();
         }
 
         /// <summary>
