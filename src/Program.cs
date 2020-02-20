@@ -15,7 +15,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Interfaces;
@@ -35,19 +34,18 @@ namespace YA.ServiceTemplate
     public class Program
     {
         internal static readonly string AppName = Assembly.GetEntryAssembly()?.GetName().Name;
-        internal static readonly Version Version = Assembly.GetEntryAssembly()?.GetName().Version;
+        internal static readonly Version AppVersion = Assembly.GetEntryAssembly()?.GetName().Version;
         internal static readonly string RootPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
         internal static Countries Country { get; private set; }
         internal static OsPlatforms OsPlatform { get; private set; }
-        internal static string DotNetVersion { get; private set; }
 
         public static async Task<int> Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 
-            GetEnvironmentInfo();
+            OsPlatform = GetOs();
 
             Directory.CreateDirectory(Path.Combine(RootPath, General.AppDataFolderName));
 
@@ -69,9 +67,6 @@ namespace YA.ServiceTemplate
                 return 1;
             }
 
-            IGeoDataService geoService = host.Services.GetService<IGeoDataService>();
-            Country = await geoService.GetCountryCodeAsync();
-
             try
             {
                 Log.Logger = CreateLogger(host);
@@ -82,12 +77,26 @@ namespace YA.ServiceTemplate
                 return 1;
             }
 
-            Log.Information("{AppName} v{Version}", AppName, Version);
+            string coreCLR = ((AssemblyInformationalVersionAttribute[])typeof(object).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
+            string coreFX = ((AssemblyInformationalVersionAttribute[])typeof(Uri).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
+
+            Log.Information("Application.Name: {AppName}\n Application.Version: {AppVersion}\n " +
+                "Environment.Version: {EnvVersion}\n RuntimeInformation.FrameworkDescription: {RuntimeInfo}\n " +
+                "CoreCLR Build: {CoreClrBuild}\n CoreCLR Hash: {CoreClrHash}\n " +
+                "CoreFX Build: {CoreFxBuild}\n CoreFX Hash: {CoreFxHash}\n " +
+                "Environment.OSVersion {OsVersion}\n RuntimeInformation.OSDescription: {OsDescr}\n " +
+                "RuntimeInformation.OSArchitecture: {OsArch}\n Environment.ProcessorCount: {CpuCount}",
+                AppName, AppVersion, Environment.Version, RuntimeInformation.FrameworkDescription, coreCLR.Split('+')[0],
+                coreCLR.Split('+')[1], coreFX.Split('+')[0], coreFX.Split('+')[1], Environment.OSVersion,
+                RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture, Environment.ProcessorCount);
+
+            IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
+            Country = await geoService.GetCountryCodeAsync();
 
             try
             {
                 await host.RunAsync();
-                Log.Information("{AppName} v{Version} has stopped.", AppName, Version);
+                Log.Information("{AppName} has stopped.", AppName);
                 return 0;
             }
             catch (Exception e)
@@ -198,7 +207,7 @@ namespace YA.ServiceTemplate
             loggerConfig
                 .ReadFrom.Configuration(configuration)
                 .Enrich.WithProperty("AppName", AppName)
-                .Enrich.WithProperty("Version", Version.ToString())
+                .Enrich.WithProperty("Version", AppVersion.ToString())
                 .Enrich.WithProperty("NodeId", Node.Id)
                 .Enrich.WithProperty("ProcessId", Process.GetCurrentProcess().Id)
                 .Enrich.WithProperty("ProcessName", Process.GetCurrentProcess().ProcessName)
@@ -265,32 +274,24 @@ namespace YA.ServiceTemplate
             limits.RequestHeadersTimeout = sourceLimits.RequestHeadersTimeout;
         }
 
-        private static void GetEnvironmentInfo()
+        private static OsPlatforms GetOs()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                OsPlatform = OsPlatforms.Windows;
+                return OsPlatforms.Windows;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                OsPlatform = OsPlatforms.Linux;
+                return OsPlatforms.Linux;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                OsPlatform = OsPlatforms.OSX;
+                return OsPlatforms.OSX;
             }
-
-            DotNetVersion = GetNetCoreVersion();
-        }
-
-        private static string GetNetCoreVersion()
-        {
-            Assembly assembly = typeof(GCSettings).Assembly;
-            string[] assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
-            return netCoreAppIndex > 0 && netCoreAppIndex < assemblyPath.Length - 2
-                ? assemblyPath[netCoreAppIndex + 1]
-                : null;
+            else
+            {
+                return OsPlatforms.Unknown;
+            }
         }
     }
 }

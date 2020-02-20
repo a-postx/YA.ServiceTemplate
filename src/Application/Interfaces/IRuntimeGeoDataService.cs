@@ -17,7 +17,7 @@ namespace YA.ServiceTemplate.Application.Interfaces
     /// <summary>
     /// Retrieves geodata for the current service.
     /// </summary>
-    interface IGeoDataService
+    interface IRuntimeGeoDataService
     {
         /// <summary>
         /// Country code of the service location (ISO 3166).

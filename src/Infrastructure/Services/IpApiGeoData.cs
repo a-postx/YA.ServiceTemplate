@@ -8,7 +8,7 @@ using YA.ServiceTemplate.Constants;
 
 namespace YA.ServiceTemplate.Infrastructure.Services
 {
-    public class IpApiGeoData : IGeoDataService
+    public class IpApiGeoData : IRuntimeGeoDataService
     {
         public IpApiGeoData(ILogger<IpApiGeoData> logger)
         {

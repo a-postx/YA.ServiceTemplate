@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Text;
 using YA.ServiceTemplate.Application;
 using YA.ServiceTemplate.Application.ActionFilters;
 using YA.ServiceTemplate.Application.Interfaces;
@@ -212,6 +213,10 @@ namespace YA.ServiceTemplate
                         // Exclude all checks and return a 200-Ok.
                         Predicate = (_) => false,
                         ResponseWriter = HealthResponse.WriteResponseAsync
+                    }).RequireCors(CorsPolicyName.AllowAny);
+                    endpoints.MapGet("/nodeid", async (context) =>
+                    {
+                        await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(Node.Id));
                     }).RequireCors(CorsPolicyName.AllowAny);
                 })
 
