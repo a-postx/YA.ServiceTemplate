@@ -4,7 +4,6 @@ using Delobytes.AspNetCore;
 using GreenPipes;
 using MassTransit;
 using MassTransit.Audit;
-using MassTransit.RabbitMqTransport;
 using MbMessages;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
 using YA.ServiceTemplate.Application;
@@ -105,9 +105,7 @@ namespace YA.ServiceTemplate
                 .AddProjectRepositories()
                 .AddProjectServices();
 
-            services.AddScoped<TestRequestConsumer>();
             services.AddScoped<IDoSomethingMessageHandler, DoSomethingMessageHandler>();
-            services.AddScoped<DoSomethingConsumer>();
 
             services.AddMassTransit(options =>
             {
@@ -118,16 +116,16 @@ namespace YA.ServiceTemplate
             {
                 return Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    IRabbitMqHost host = cfg.Host(secrets.MessageBusHost, secrets.MessageBusVHost, h =>
+                    cfg.Host(secrets.MessageBusHost, secrets.MessageBusVHost, h =>
                     {
                         h.Username(secrets.MessageBusLogin);
                         h.Password(secrets.MessageBusPassword);
                     });
 
-                    cfg.UseSerilog();
+                    cfg.SetLoggerFactory(provider.GetRequiredService<ILoggerFactory>());
                     cfg.UseSerilogMessagePropertiesEnricher();
 
-                    cfg.ReceiveEndpoint(host, MbQueueNames.PrivateServiceQueueName, e =>
+                    cfg.ReceiveEndpoint(MbQueueNames.PrivateServiceQueueName, e =>
                     {
                         e.PrefetchCount = 16;
                         e.UseMessageRetry(x => x.Interval(2, 500));
@@ -140,7 +138,7 @@ namespace YA.ServiceTemplate
                         e.Consumer<TestRequestConsumer>(provider);
                     });
 
-                    cfg.ReceiveEndpoint(host, "ya.servicetemplate.receiveendpoint", e =>
+                    cfg.ReceiveEndpoint("ya.servicetemplate.receiveendpoint", e =>
                     {
                         e.PrefetchCount = 16;
                         e.UseMessageRetry(x => x.Interval(2, 100));
@@ -174,7 +172,7 @@ namespace YA.ServiceTemplate
                     Header = General.CorrelationIdHeader,
                     IncludeInResponse = false,
                     UpdateTraceIdentifier = true,
-                    UseGuidForCorrelationId = false
+                    UseGuidForCorrelationId = true
                 })
                 .UseCorrelationIdContextLogging()
 
