@@ -97,7 +97,7 @@
 Если вы хотите развернуть приложение на платформе Miscrosoft Azure, то можете дополнительно воспользоваться телеметрией Application Insights. Откройте https://portal.azure.com, перейдите в раздел Application Insights и добавьте новый ресурс чтобы получить ключ инструментирования
 
 ### Конфигурация
-* Снова откройте https://console.aws.amazon.com, выберите регион Амазона "US East (N. Virginia) us-east-1" и перейдите в сервис Systems Manager
+* Снова откройте https://console.aws.amazon.com, выберите регион Амазона "Europe (Frankfurt) eu-central-1" и перейдите в сервис Systems Manager
 * Откройте раздел "Управление Приложениями -> Хранилище Параметров" и добавьте параметры с полученными в предыдущих пунктах значениями:
   - /development/messagebushost
   - /development/messagebusvhost
@@ -215,7 +215,7 @@ If you would like to use Logstash and Kibana for log management then you can reg
 If you would like to deploy application on Miscrosoft Azure then you may benefit from Application Insights telemetry. Go to https://portal.azure.com, open up Application Insights and add new resource to get instrumentation key
 
 ### Configure
-* Go to https://console.aws.amazon.com, choose "US East (N. Virginia) us-east-1" AWS region and open up Systems Manager service
+* Go to https://console.aws.amazon.com, choose "Europe (Frankfurt) eu-central-1" AWS region and open up Systems Manager service
 * Go to "Applicatin Management -> Parameter Store" and add the following parameters with the values you get on the previous steps:
   - /development/messagebushost
   - /development/messagebusvhost

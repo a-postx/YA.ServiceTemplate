@@ -167,14 +167,7 @@ namespace YA.ServiceTemplate
         public void Configure(IApplicationBuilder application)
         {
             application
-                .UseCorrelationId(new CorrelationIdOptions
-                {
-                    Header = General.CorrelationIdHeader,
-                    IncludeInResponse = false,
-                    UpdateTraceIdentifier = true,
-                    UseGuidForCorrelationId = true
-                })
-                .UseCorrelationIdContextLogging()
+                .UseCorrelationId()
 
                 .UseForwardedHeaders(new ForwardedHeadersOptions
                 {

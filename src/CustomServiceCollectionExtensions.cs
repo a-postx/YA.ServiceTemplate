@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using CorrelationId;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -22,10 +21,10 @@ using YA.ServiceTemplate.Health.System;
 using YA.ServiceTemplate.Health.Services;
 using YA.ServiceTemplate.OperationFilters;
 using YA.ServiceTemplate.Options;
-using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using YA.ServiceTemplate.Constants;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using CorrelationId.DependencyInjection;
 
 namespace YA.ServiceTemplate
 {
@@ -36,7 +35,18 @@ namespace YA.ServiceTemplate
     {
         public static IServiceCollection AddCorrelationIdFluent(this IServiceCollection services)
         {
-            services.AddCorrelationId();
+            services.AddDefaultCorrelationId(options =>
+            {
+                options.CorrelationIdGenerator = () => "";
+                options.AddToLoggingScope = true;
+                options.LoggingScopeKey = Logs.CorrelationId;
+                options.EnforceHeader = false;
+                options.IgnoreRequestHeader = false;
+                options.IncludeInResponse = false;
+                options.RequestHeader = General.CorrelationIdHeader;
+                options.ResponseHeader = General.CorrelationIdHeader;
+                options.UpdateTraceIdentifier = false;
+            });
 
             return services;
         }

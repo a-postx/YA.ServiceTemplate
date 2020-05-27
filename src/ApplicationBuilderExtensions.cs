@@ -69,12 +69,6 @@ namespace YA.ServiceTemplate
                 });
         }
 
-        public static IApplicationBuilder UseCorrelationIdContextLogging(this IApplicationBuilder application)
-        {
-            return application
-                .UseMiddleware<CorrelationIdContextLogger>();
-        }
-
         public static IApplicationBuilder UseHttpContextLogging(this IApplicationBuilder application)
         {
             return application
