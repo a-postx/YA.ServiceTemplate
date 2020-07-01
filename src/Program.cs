@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -93,6 +94,12 @@ namespace YA.ServiceTemplate
             IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
             Country = await geoService.GetCountryCodeAsync();
 
+            IHostApplicationLifetime hostLifetime = host.Services.GetService<IHostApplicationLifetime>();
+            hostLifetime.ApplicationStopping.Register(() =>
+            {
+                host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Shutdown has been initiated.");
+            });
+
             try
             {
                 await host.RunAsync();
@@ -154,7 +161,7 @@ namespace YA.ServiceTemplate
 
                 // Used for IIS and IIS Express for in-process hosting. Use UseIISIntegration for out-of-process hosting.
                 .UseIIS()
-                .UseShutdownTimeout(TimeSpan.FromSeconds(General.SystemShutdownTimeoutSec))
+                .UseShutdownTimeout(TimeSpan.FromSeconds(General.WebHostShutdownTimeoutSec))
                 .UseStartup<Startup>();
         }
 

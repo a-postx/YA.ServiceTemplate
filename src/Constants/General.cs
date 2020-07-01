@@ -2,7 +2,8 @@
 {
     public static class General
     {
-        public const int SystemShutdownTimeoutSec = 60;
+        public const int HostShutdownTimeoutSec = 15;
+        public const int WebHostShutdownTimeoutSec = 60;
         public const string AppDataFolderName = "AppData";
         public const string AppHttpUserAgent = "YA.ServiceTemplate/1.0";
         public const string CorrelationIdHeader = "X-Correlation-ID";

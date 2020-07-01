@@ -66,6 +66,11 @@ namespace YA.ServiceTemplate
 
             AppSecrets secrets = _config.Get<AppSecrets>();
 
+            services.Configure<HostOptions>(options =>
+            {
+                options.ShutdownTimeout = TimeSpan.FromSeconds(General.HostShutdownTimeoutSec);
+            });
+
             if (!string.IsNullOrEmpty(secrets.AppInsightsInstrumentationKey))
             {
                 ApplicationInsightsServiceOptions options = new ApplicationInsightsServiceOptions
