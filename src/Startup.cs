@@ -114,12 +114,7 @@ namespace YA.ServiceTemplate
 
             services.AddMassTransit(options =>
             {
-                options.AddConsumers(GetType().Assembly);
-            });
-
-            services.AddSingleton(provider =>
-            {
-                return Bus.Factory.CreateUsingRabbitMq(cfg =>
+                options.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(secrets.MessageBusHost, secrets.MessageBusVHost, h =>
                     {
@@ -127,7 +122,6 @@ namespace YA.ServiceTemplate
                         h.Password(secrets.MessageBusPassword);
                     });
 
-                    cfg.SetLoggerFactory(provider.GetRequiredService<ILoggerFactory>());
                     cfg.UseSerilogMessagePropertiesEnricher();
 
                     cfg.ReceiveEndpoint(MbQueueNames.PrivateServiceQueueName, e =>
@@ -140,7 +134,7 @@ namespace YA.ServiceTemplate
                         e.Exclusive = true;
                         e.ExclusiveConsumer = true;
 
-                        e.Consumer<TestRequestConsumer>(provider);
+                        e.ConfigureConsumer<TestRequestConsumer>(context);
                     });
 
                     cfg.ReceiveEndpoint("ya.servicetemplate.receiveendpoint", e =>
@@ -148,9 +142,11 @@ namespace YA.ServiceTemplate
                         e.PrefetchCount = 16;
                         e.UseMessageRetry(x => x.Interval(2, 100));
 
-                        e.Consumer<DoSomethingConsumer>(provider);
+                        e.ConfigureConsumer<DoSomethingConsumer>(context);
                     });
                 });
+                
+                options.AddConsumers(GetType().Assembly);
             });
 
             services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
