@@ -4,6 +4,7 @@ using Delobytes.AspNetCore;
 using GreenPipes;
 using MassTransit;
 using MassTransit.Audit;
+using MassTransit.PrometheusIntegration;
 using MbMessages;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -14,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Prometheus;
 using System;
 using System.Text;
 using YA.ServiceTemplate.Application;
@@ -123,6 +124,7 @@ namespace YA.ServiceTemplate
                     });
 
                     cfg.UseSerilogMessagePropertiesEnricher();
+                    cfg.UsePrometheusMetrics();
 
                     cfg.ReceiveEndpoint(MbQueueNames.PrivateServiceQueueName, e =>
                     {
@@ -211,6 +213,9 @@ namespace YA.ServiceTemplate
                         await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(Node.Id));
                     }).RequireCors(CorsPolicyName.AllowAny);
                 })
+                .UseMetricServer()
+                .UseHttpMetrics()
+                .UseHealthChecksPrometheusExporter("/metrics")
 
                 .UseSwagger()
                 .UseCustomSwaggerUI();
