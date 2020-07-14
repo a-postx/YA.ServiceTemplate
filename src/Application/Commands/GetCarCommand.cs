@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Delobytes.Mapper;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Core.Entities;
 

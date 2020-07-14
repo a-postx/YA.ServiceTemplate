@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Core.Entities;

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Core.Entities;

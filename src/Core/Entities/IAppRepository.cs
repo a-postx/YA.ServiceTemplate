@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Interfaces
+namespace YA.ServiceTemplate.Core.Entities
 {
     public interface IAppRepository
     {
