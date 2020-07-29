@@ -9,6 +9,9 @@ using YA.ServiceTemplate.Constants;
 
 namespace YA.ServiceTemplate.Infrastructure.Messaging
 {
+    /// <summary>
+    /// Хранилище данных аудита сообщений шины данных, использующее простое логирование
+    /// </summary>
     public class MessageAuditStore : IMessageAuditStore
     {
         public MessageAuditStore(ILogger<MessageAuditStore> logger)
@@ -28,10 +31,18 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging
                 savedMessage = savedMessage.Substring(0, General.MaxLogFieldLength);
             }
 
-            //CorrelationId being overwritten if exist
-            _log.LogInformation("{LogType}{MessageBusContextType}{MessageBusDestinationAddress}{MessageBusSourceAddress}{CorrelationId}{MessageBusConversationId}{MessageBusMessage}",
-                LogTypes.MessageBusMessage.ToString(), metadata.ContextType, metadata.DestinationAddress, metadata.SourceAddress,
-                metadata.CorrelationId, metadata.ConversationId, savedMessage);
+            //корреляционный идентификатор перезаписывается, если уже существует
+            using (_log.BeginScopeWith((Logs.LogType, LogTypes.MessageBusMessage.ToString()),
+                (Logs.MessageBusContextType, metadata.ContextType),
+                (Logs.MessageBusSourceAddress, metadata.SourceAddress),
+                (Logs.MessageBusDestinationAddress, metadata.DestinationAddress),
+                (Logs.MessageBusMessageId, metadata.MessageId),
+                (Logs.CorrelationId, metadata.CorrelationId),
+                (Logs.MessageBusConversationId, metadata.ConversationId),
+                (Logs.MessageBusMessage, savedMessage)))
+            {
+                _log.LogInformation("{MessageBusContextType} message bus message {MessageBusMessageId}", metadata.ContextType, metadata.MessageId);
+            }
 
             return Task.CompletedTask;
         }

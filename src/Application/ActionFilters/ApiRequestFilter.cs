@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.Dto;
 using YA.ServiceTemplate.Constants;
@@ -16,7 +15,8 @@ using YA.ServiceTemplate.Core.Entities;
 namespace YA.ServiceTemplate.Application.ActionFilters
 {
     /// <summary>
-    /// Idempotency filter: saves request and result to return the same result in case of duplicate request.
+    /// Фильтр идемпотентности: не допускает запросов без корелляционного идентификатора
+    /// и сохраняет запрос и результат чтобы вернуть тот же ответ в случае запроса-дубликата.
     /// </summary>
     public sealed class ApiRequestFilter : ActionFilterAttribute
     {
@@ -31,7 +31,7 @@ namespace YA.ServiceTemplate.Application.ActionFilters
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource())
+            using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
             {
                 string method = context.HttpContext.Request.Method;
 
@@ -42,7 +42,7 @@ namespace YA.ServiceTemplate.Application.ActionFilters
                     if (!requestCreated)
                     {
                         ApiProblemDetails apiError = new ApiProblemDetails("https://tools.ietf.org/html/rfc7231#section-6.5.8", StatusCodes.Status409Conflict,
-                                context.HttpContext.Request.HttpContext.Request.Path.Value, "Api call is already exist.", null, request.ApiRequestId.ToString(),
+                                context.HttpContext.Request.HttpContext.Request.Path.Value, "Запрос уже существует.", null, request.ApiRequestId.ToString(),
                                 context.HttpContext.Request.HttpContext.TraceIdentifier);
 
                         context.Result = new ConflictObjectResult(apiError);
@@ -51,7 +51,14 @@ namespace YA.ServiceTemplate.Application.ActionFilters
                 }
                 else
                 {
-                    context.Result = new BadRequestResult();
+                    ProblemDetails problemDetails = new ProblemDetails()
+                    {
+                        Instance = context.HttpContext.Request.Path,
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = $"Запрос не содержит заголовка {General.CorrelationIdHeader} или значение в нём неверно."
+                    };
+
+                    context.Result = new BadRequestObjectResult(problemDetails);
                     return;
                 }
             }
@@ -61,7 +68,7 @@ namespace YA.ServiceTemplate.Application.ActionFilters
 
         public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource())
+            using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
             {
                 string method = context.HttpContext.Request.Method;
 
@@ -99,21 +106,15 @@ namespace YA.ServiceTemplate.Application.ActionFilters
                                 break;
                             case ObjectResult objectRequestResult:
                                 {
-                                    ApiRequestResult apiRequestResult = new ApiRequestResult
-                                    {
-                                        StatusCode = objectRequestResult.StatusCode,
-                                        Body = JToken.Parse(JsonConvert.SerializeObject(objectRequestResult.Value)).ToString(Formatting.None)
-                                    };
+                                    string body = JToken.Parse(JsonConvert.SerializeObject(objectRequestResult.Value)).ToString(Formatting.None);
+                                    ApiRequestResult apiRequestResult = new ApiRequestResult(objectRequestResult.StatusCode, body);
 
                                     await _apiRequestTracker.SetResultAsync(request, apiRequestResult, cts.Token);
                                     break;
                                 }
                             case OkResult okResult:
                                 {
-                                    ApiRequestResult result = new ApiRequestResult
-                                    {
-                                        StatusCode = okResult.StatusCode
-                                    };
+                                    ApiRequestResult result = new ApiRequestResult(okResult.StatusCode, null);
 
                                     await _apiRequestTracker.SetResultAsync(request, result, cts.Token);
                                     break;

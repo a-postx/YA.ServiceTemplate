@@ -1,0 +1,4 @@
+﻿# Если вы нашли уязвимость, то мы надеемся вы сообщите нам о ней.
+# https://securitytxt.org/
+Contact: mailto:security@ya.ru
+Preferred-Languages: ru, en

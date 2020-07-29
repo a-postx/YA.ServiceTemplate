@@ -11,8 +11,8 @@ using YA.ServiceTemplate.Core.Entities;
 namespace YA.ServiceTemplate.Application
 {
     /// <summary>
-    /// Track API request state.
-    /// TODO: change store to a high write throughput one (Redis, Mongo etc.) or leave just in-memory caching
+    /// Отслеживает АПИ-запросы. Нужно подумать о смене хранилища
+    /// на что-то с хорошей скоростью записи (Редис, Монго и т.п.) или оставить кеширование в памяти
     /// </summary>
     public class ApiRequestTracker : IApiRequestTracker
     {

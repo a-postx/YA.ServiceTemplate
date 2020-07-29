@@ -189,12 +189,8 @@ namespace YA.ServiceTemplate
                     options.IncludeXmlCommentsIfExists(assembly);
 
                     options.OperationFilter<ApiVersionOperationFilter>();
-                    
                     options.OperationFilter<CorrelationIdOperationFilter>();
                     options.OperationFilter<ContentTypeOperationFilter>();
-                    options.OperationFilter<ClaimsOperationFilter>();
-                    options.OperationFilter<ForbiddenResponseOperationFilter>();
-                    options.OperationFilter<UnauthorizedResponseOperationFilter>();
 
                     // Show an example model for JsonPatchDocument<T>.
                     options.SchemaFilter<JsonPatchDocumentSchemaFilter>();

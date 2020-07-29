@@ -2,7 +2,13 @@
 {
     public class ApiRequestResult
     {
-        public int? StatusCode { get; set; }
-        public string Body { get; set; }
+        private ApiRequestResult() { }
+        public ApiRequestResult(int? code, string body)
+        {
+            StatusCode = code;
+            Body = body;
+        }
+        public int? StatusCode { get; private set; }
+        public string Body { get; private set; }
     }
 }
