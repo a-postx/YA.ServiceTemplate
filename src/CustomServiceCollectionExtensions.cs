@@ -25,6 +25,7 @@ using Microsoft.OpenApi.Models;
 using YA.ServiceTemplate.Constants;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using CorrelationId.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace YA.ServiceTemplate
 {
@@ -184,6 +185,7 @@ namespace YA.ServiceTemplate
 
                     options.DescribeAllParametersInCamelCase();
                     options.EnableAnnotations();
+                    options.AddFluentValidationRules();
 
                     // Add the XML comment file for this assembly, so its contents can be displayed.
                     options.IncludeXmlCommentsIfExists(assembly);

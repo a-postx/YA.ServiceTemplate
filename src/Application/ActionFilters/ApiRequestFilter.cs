@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Interfaces;
@@ -18,49 +19,59 @@ namespace YA.ServiceTemplate.Application.ActionFilters
     /// Фильтр идемпотентности: не допускает запросов без корелляционного идентификатора
     /// и сохраняет запрос и результат чтобы вернуть тот же ответ в случае запроса-дубликата.
     /// </summary>
-    public sealed class ApiRequestFilter : ActionFilterAttribute
+    public class ApiRequestFilter : ActionFilterAttribute
     {
-        public ApiRequestFilter(IApiRequestTracker apiRequestTracker, ICorrelationContextAccessor correlationContextAccessor)
+        public ApiRequestFilter(IApiRequestTracker apiRequestTracker, IRuntimeContextAccessor runtimeContextAccessor)
         {
-            _correlationContextAccessor = correlationContextAccessor ?? throw new ArgumentNullException(nameof(correlationContextAccessor));
+            _runtimeCtx = runtimeContextAccessor ?? throw new ArgumentNullException(nameof(runtimeContextAccessor));
             _apiRequestTracker = apiRequestTracker ?? throw new ArgumentNullException(nameof(apiRequestTracker));
         }
 
-        private readonly ICorrelationContextAccessor _correlationContextAccessor;
+        private readonly IRuntimeContextAccessor _runtimeCtx;
         private readonly IApiRequestTracker _apiRequestTracker;
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
-            {
-                string method = context.HttpContext.Request.Method;
+            string method = context.HttpContext.Request.Method;
 
-                if (Guid.TryParse(_correlationContextAccessor.CorrelationContext.CorrelationId, out Guid correlationId))
+            Guid correlationId = _runtimeCtx.GetCorrelationId();
+
+            if (correlationId != Guid.Empty)
+            {
+                using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
                 {
                     (bool requestCreated, ApiRequest request) = await _apiRequestTracker.GetOrCreateRequestAsync(correlationId, method, cts.Token);
 
                     if (!requestCreated)
                     {
-                        ApiProblemDetails apiError = new ApiProblemDetails("https://tools.ietf.org/html/rfc7231#section-6.5.8", StatusCodes.Status409Conflict,
-                                context.HttpContext.Request.HttpContext.Request.Path.Value, "Запрос уже существует.", null, request.ApiRequestId.ToString(),
-                                context.HttpContext.Request.HttpContext.TraceIdentifier);
+                        ProblemDetails apiError = new ProblemDetails
+                        {
+                            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+                            Status = StatusCodes.Status409Conflict,
+                            Instance = context.HttpContext.Request.HttpContext.Request.Path.Value,
+                            Title = "Запрос уже существует.",
+                            Detail = null
+                        };
+                        apiError.Extensions.Add("correlationId", request.ApiRequestID.ToString());
+                        apiError.Extensions.Add("traceId", _runtimeCtx.GetTraceId().ToString());
 
                         context.Result = new ConflictObjectResult(apiError);
                         return;
                     }
                 }
-                else
+            }
+            else
+            {
+                ProblemDetails problemDetails = new ProblemDetails()
                 {
-                    ProblemDetails problemDetails = new ProblemDetails()
-                    {
-                        Instance = context.HttpContext.Request.Path,
-                        Status = StatusCodes.Status400BadRequest,
-                        Detail = $"Запрос не содержит заголовка {General.CorrelationIdHeader} или значение в нём неверно."
-                    };
+                    Instance = context.HttpContext.Request.Path,
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = $"Запрос не содержит заголовка {General.CorrelationIdHeader} или значение в нём неверно."
+                };
+                problemDetails.Extensions.Add("traceId", _runtimeCtx.GetTraceId().ToString());
 
-                    context.Result = new BadRequestObjectResult(problemDetails);
-                    return;
-                }
+                context.Result = new BadRequestObjectResult(problemDetails);
+                return;
             }
 
             await next.Invoke();
@@ -68,11 +79,12 @@ namespace YA.ServiceTemplate.Application.ActionFilters
 
         public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
-            using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
-            {
-                string method = context.HttpContext.Request.Method;
+            string method = context.HttpContext.Request.Method;
+            Guid correlationId = _runtimeCtx.GetCorrelationId();
 
-                if (Guid.TryParse(_correlationContextAccessor.CorrelationContext.CorrelationId, out Guid correlationId))
+            if (correlationId != Guid.Empty)
+            {
+                using (CancellationTokenSource cts = new CancellationTokenSource(Timeouts.ApiRequestFilterMs))
                 {
                     (bool requestCreated, ApiRequest request) = await _apiRequestTracker.GetOrCreateRequestAsync(correlationId, method, cts.Token);
 
@@ -80,7 +92,7 @@ namespace YA.ServiceTemplate.Application.ActionFilters
                     {
                         switch (context.Result)
                         {
-                            case ObjectResult objectRequestResult when objectRequestResult.Value is ApiProblemDetails apiError:
+                            case ObjectResult objectRequestResult when objectRequestResult.Value is ProblemDetails apiError:
                                 ////if (apiError.Code == ApiErrorCodes.DUPLICATE_API_CALL)
                                 ////{
                                 ////    if (request.ResponseBody != null)

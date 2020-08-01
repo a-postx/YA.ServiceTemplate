@@ -191,7 +191,7 @@ namespace YA.ServiceTemplate.Infrastructure.Data
 
         public Task<ApiRequest> GetApiRequestAsync(Guid correlationId)
         {
-            ApiRequest apiRequest = ApiRequests.FirstOrDefault(ar => ar.ApiRequestId == correlationId);
+            ApiRequest apiRequest = ApiRequests.FirstOrDefault(ar => ar.ApiRequestID == correlationId);
             return Task.FromResult(apiRequest);
         }
 

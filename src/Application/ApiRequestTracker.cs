@@ -39,7 +39,7 @@ namespace YA.ServiceTemplate.Application
             {
                 if (request != null)
                 {
-                    _apiRequestCache.Add(request, request.ApiRequestId);
+                    _apiRequestCache.Add(request, request.ApiRequestID);
                     return (false, request);
                 }
                 else
@@ -48,7 +48,7 @@ namespace YA.ServiceTemplate.Application
 
                     ApiRequest createdRequest = await _apiRequestRepository.CreateApiRequestAsync(newApiRequest);
 
-                    _apiRequestCache.Add(newApiRequest, newApiRequest.ApiRequestId);
+                    _apiRequestCache.Add(newApiRequest, newApiRequest.ApiRequestID);
 
                     return (true, createdRequest);
                 }
@@ -88,7 +88,7 @@ namespace YA.ServiceTemplate.Application
             
             await _apiRequestRepository.UpdateApiRequestAsync(request);
 
-            _apiRequestCache.Update(request, request.ApiRequestId);
+            _apiRequestCache.Update(request, request.ApiRequestID);
         }
     }
 }

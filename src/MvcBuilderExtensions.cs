@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -15,6 +15,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Http;
+using YA.ServiceTemplate.Application.Interfaces;
 
 namespace YA.ServiceTemplate
 {
@@ -121,6 +124,36 @@ namespace YA.ServiceTemplate
             return mvcOptions.InputFormatters
                 .OfType<NewtonsoftJsonPatchInputFormatter>()
                 .First();
+        }
+
+        public static IMvcBuilder AddCustomModelValidation(this IMvcBuilder builder)
+        {
+            return builder
+                .AddFluentValidation(fv =>
+                {
+                    fv.RegisterValidatorsFromAssemblyContaining<Startup>();
+                    fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+                    fv.ImplicitlyValidateChildProperties = true;
+                })
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        IRuntimeContextAccessor runtimeCtx = context.HttpContext.RequestServices.GetRequiredService<IRuntimeContextAccessor>();
+
+                        ValidationProblemDetails problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Title = "Произошла ошибка валидации данных модели.",
+                            Status = StatusCodes.Status400BadRequest,
+                            Detail = "Обратитесь к свойству errors за дополнительной информацией.",
+                            Instance = context.HttpContext.Request.Path
+                        };
+                        problemDetails.Extensions.Add("correlationId", runtimeCtx.GetCorrelationId());
+                        problemDetails.Extensions.Add("traceId", runtimeCtx.GetTraceId());
+
+                        return new BadRequestObjectResult(problemDetails);
+                    };
+                });
         }
     }
 }

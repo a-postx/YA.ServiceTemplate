@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <Authors>Alexey Yakubin</Authors>
     <Company>Delobytes</Company>
     <Product>YA.ServiceTemplate</Product>
@@ -33,15 +33,17 @@
     <PackageReference Include="Delobytes.AspNetCore" Version="2.1.2" />
     <PackageReference Include="Delobytes.AspNetCore.Swagger" Version="3.0.0" />
     <PackageReference Include="Delobytes.Mapper" Version="1.1.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.0.1" />
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.2" />
     <PackageReference Include="MassTransit.Prometheus" Version="7.0.2" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.2" />
+    <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0-rc.2" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.14.0" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServicesIntegration" Version="3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="4.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.6.13" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.7.54" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="3.6.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
@@ -66,6 +68,7 @@
   <ItemGroup>
     <Folder Include="Connected Services\" />
     <Folder Include="Infrastructure\Caching\" />
+    <Folder Include="Infrastructure\Messaging\Filters\" />
   </ItemGroup>
 
 </Project>

@@ -103,7 +103,8 @@ namespace YA.ServiceTemplate
             services
                 .AddControllers()
                     .AddCustomJsonOptions(_webHostEnvironment)
-                    .AddCustomMvcOptions(_config);
+                    .AddCustomMvcOptions(_config)
+                    .AddCustomModelValidation();
 
             services
                 .AddProjectCommands()
@@ -143,6 +144,7 @@ namespace YA.ServiceTemplate
                     {
                         e.PrefetchCount = 16;
                         e.UseMessageRetry(x => x.Interval(2, 100));
+                        e.UseMbContextFilter();
 
                         e.ConfigureConsumer<DoSomethingConsumer>(context);
                     });

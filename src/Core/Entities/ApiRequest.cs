@@ -11,12 +11,12 @@ namespace YA.ServiceTemplate.Core.Entities
 
         public ApiRequest(Guid correlationId, DateTime dateTime, string method)
         {
-            ApiRequestId = correlationId;
+            ApiRequestID = correlationId;
             ApiRequestDateTime = dateTime;
             Method = method;
         }
 
-        public Guid ApiRequestId { get; private set; }
+        public Guid ApiRequestID { get; private set; }
         public DateTime ApiRequestDateTime { get; private set; }
         public string Method { get; set; }
         public int? ResponseStatusCode { get; private set; }
