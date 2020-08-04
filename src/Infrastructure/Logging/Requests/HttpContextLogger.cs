@@ -109,11 +109,6 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
 
                         context.Response.Body.Seek(0, SeekOrigin.Begin);
 
-                        if (Enumerable.Range(400, 599).Contains(context.Response.StatusCode) && responseBody.Contains("traceId", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            LogContext.PushProperty(Logs.TraceId, runtimeCtx.GetTraceId());
-                        }
-
                         string endResponseBody = (responseBody.Length > General.MaxLogFieldLength) ?
                             responseBody.Substring(0, General.MaxLogFieldLength) : responseBody;
 

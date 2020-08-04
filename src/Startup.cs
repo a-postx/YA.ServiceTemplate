@@ -192,6 +192,10 @@ namespace YA.ServiceTemplate
                     _webHostEnvironment.IsDevelopment(),
                     x => x.UseDeveloperErrorPages())
 
+                .UseHealthChecksPrometheusExporter("/metrics")
+                .UseMetricServer()
+                .UseHttpMetrics()
+
                 .UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers().RequireCors(CorsPolicyName.AllowAny);
@@ -215,9 +219,6 @@ namespace YA.ServiceTemplate
                         await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(Node.Id));
                     }).RequireCors(CorsPolicyName.AllowAny);
                 })
-                .UseMetricServer()
-                .UseHttpMetrics()
-                .UseHealthChecksPrometheusExporter("/metrics")
 
                 .UseSwagger()
                 .UseCustomSwaggerUI();
