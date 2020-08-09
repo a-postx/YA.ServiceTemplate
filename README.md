@@ -40,7 +40,7 @@
 Таким образом структурированные сообщения в логах содержат унифицированный идентификатор корелляции по которому можно легко отследить все изменения, которые вызвал HTTP-запрос или сообщение из шины данных.
 
 ### Мониторинг
-Микросервис включает в себя страницу с проверками здоровья (/status), которую может использовать система мониторинга, работающая по модели считывания (напр. Prometheus).
+Микросервис включает в себя страницу с проверками здоровья (/status) и метриками (/metrics), которую может использовать система мониторинга, работающая по модели считывания (напр. Prometheus).
 
 ### Секреты
 Конфиденциальные настройки приложения хранятся в переменных окружения и на внешнем хранилище (AWS Systems Manager).
@@ -159,7 +159,7 @@ The application is configured with the following items:
 Structured log events contains unified correlation identifier so changes caused by a single HTTP-request or message queue message can be easily identified and tracked.
 
 ### Monitoring
-The application contains health checks page (/status) to be used by monitoring systems that works with pull model (ex. Prometheus).
+The application contains health checks page (/status) and metrics page (/metrics) to be used by monitoring systems that works with pull model (ex. Prometheus).
 
 ### Secrets
 Sensitive application options are stored as environment variables and on external secrets storage (AWS Systems Manager).
