@@ -5,45 +5,43 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
+using YA.ServiceTemplate.Infrastructure.Services.GeoDataModels;
 
 namespace YA.ServiceTemplate.Infrastructure.Services
 {
-    public class IpApiGeoData : IRuntimeGeoDataService
+    public class SypexRuntimeGeoData : IRuntimeGeoDataService
     {
-        public IpApiGeoData(ILogger<IpApiGeoData> logger)
+        public SypexRuntimeGeoData(ILogger<SypexRuntimeGeoData> logger)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
-            ProviderUrl = "http://ip-api.com";
+            ProviderUrl = "https://api.sypexgeo.net/json";
         }
 
-        private readonly ILogger<IpApiGeoData> _log;
+        private readonly ILogger<SypexRuntimeGeoData> _log;
 
         private string ProviderUrl { get; set; }
-        private GeoData Data { get; set; }
 
         public async Task<Countries> GetCountryCodeAsync()
         {
             Countries result = Countries.UN;
 
-            Data = await GetGeoDataAsync();
+            SypexGeoData geoData = await GetGeoDataAsync();
 
-            if (Data != null)
+            if (geoData != null)
             {
-                bool success = Enum.TryParse(Data.CountryCode, out Countries parseResult);
-
-                if (success)
+                if (Enum.TryParse(geoData.country.iso, out Countries parseResult))
                 {
                     result = parseResult;
-                    _log.LogInformation("Geodata received successfully, application country is {Country}", result.ToString());
+                    _log.LogInformation("Geodata received successfully, runtime country is {Country}", result.ToString());
                 }
             }
 
             return result;
         }
 
-        private async Task<GeoData> GetGeoDataAsync()
+        private async Task<SypexGeoData> GetGeoDataAsync()
         {
-            GeoData result = null;
+            SypexGeoData result = null;
 
             try
             {
@@ -51,11 +49,11 @@ namespace YA.ServiceTemplate.Infrastructure.Services
                 {
                     client.BaseAddress = new Uri(ProviderUrl);
 
-                    using (HttpResponseMessage response = await client.GetAsync("/json"))
+                    using (HttpResponseMessage response = await client.GetAsync(new Uri("/json", UriKind.Relative)))
                     {
                         if (response.StatusCode == HttpStatusCode.OK)
                         {
-                            GeoData data = await response.Content.ReadAsJsonAsync<GeoData>();
+                            SypexGeoData data = await response.Content.ReadAsJsonAsync<SypexGeoData>();
 
                             if (data != null)
                             {
@@ -73,9 +71,9 @@ namespace YA.ServiceTemplate.Infrastructure.Services
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _log.LogError("Error getting geodata: {Error}", e);
+                _log.LogError(ex, "Error getting geodata");
             }
 
             return result;

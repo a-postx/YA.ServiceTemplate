@@ -61,7 +61,7 @@ namespace YA.ServiceTemplate
         {
             return services
                 .AddSingleton<IClockService, ClockService>()
-                .AddSingleton<IRuntimeGeoDataService, IpApiGeoData>()
+                .AddSingleton<IRuntimeGeoDataService, SypexRuntimeGeoData>()
                 .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
                 .AddHostedService<StartupService>()
                 .AddHostedService<MessageBusService>();
