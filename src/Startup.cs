@@ -69,7 +69,7 @@ namespace YA.ServiceTemplate
 
             services.Configure<HostOptions>(options =>
             {
-                options.ShutdownTimeout = TimeSpan.FromSeconds(General.HostShutdownTimeoutSec);
+                options.ShutdownTimeout = TimeSpan.FromSeconds(Timeouts.HostShutdownTimeoutSec);
             });
 
             if (!string.IsNullOrEmpty(secrets.AppInsightsInstrumentationKey))

@@ -9,7 +9,6 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using Swashbuckle.AspNetCore.Annotations;
 using YA.ServiceTemplate.Application.Models.SaveModels;
-using YA.ServiceTemplate.Application.Models.Dto;
 using YA.ServiceTemplate.Application.ActionFilters;
 
 namespace YA.ServiceTemplate.Controllers
@@ -21,7 +20,7 @@ namespace YA.ServiceTemplate.Controllers
     [ApiController]
     [ApiVersion(ApiVersionName.V1)]
     [ServiceFilter(typeof(ApiRequestFilter))]
-    [SwaggerResponse(StatusCodes.Status500InternalServerError, HttpCodeMessages.Code500ErrorMessage, typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, SwaggerResponseDescriptions.Code500, typeof(ProblemDetails))]
     public class CarsController : ControllerBase
     {
         /// <summary>

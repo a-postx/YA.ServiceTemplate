@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http;
 using YA.ServiceTemplate.Application.Interfaces;
+using System.Globalization;
 
 namespace YA.ServiceTemplate
 {
@@ -75,15 +76,14 @@ namespace YA.ServiceTemplate
                 jsonSystemInputFormatterMediaTypes.Remove("text/json");
                 jsonSystemOutputFormatterMediaTypes.Remove("text/json");
 
-                // Add Problem Details media type (application/problem+json) to the JSON output formatters.
-                // See https://tools.ietf.org/html/rfc7807
-                jsonSystemOutputFormatterMediaTypes.Insert(0, ContentType.ProblemJson);
-
                 // Add RESTful JSON media type (application/vnd.restful+json) to the JSON input and output formatters.
                 // See http://restfuljson.org/
                 jsonSystemInputFormatterMediaTypes.Insert(0, ContentType.RestfulJson);
                 jsonSystemOutputFormatterMediaTypes.Insert(0, ContentType.RestfulJson);
 
+                // Add Problem Details media type (application/problem+json) to the JSON output formatters.
+                // See https://tools.ietf.org/html/rfc7807
+                jsonSystemOutputFormatterMediaTypes.Insert(0, ContentType.ProblemJson);
 
                 // Add support for Newtonsoft JSON Patch (application/json-patch+json).
                 options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
@@ -134,6 +134,8 @@ namespace YA.ServiceTemplate
                     fv.RegisterValidatorsFromAssemblyContaining<Startup>();
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                     fv.ImplicitlyValidateChildProperties = true;
+                    fv.LocalizationEnabled = true;
+                    fv.ValidatorOptions.LanguageManager.Culture = new CultureInfo("ru");
                 })
                 .ConfigureApiBehaviorOptions(options =>
                 {
