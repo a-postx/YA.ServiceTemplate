@@ -1,13 +1,13 @@
-using Microsoft.Extensions.DependencyInjection;
 using Delobytes.Mapper;
+using Microsoft.Extensions.DependencyInjection;
 using YA.ServiceTemplate.Application.Commands;
+using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Mappers;
-using YA.ServiceTemplate.Infrastructure.Data;
-using YA.ServiceTemplate.Infrastructure.Services;
+using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Core.Entities;
-using YA.ServiceTemplate.Application.Models.SaveModels;
-using YA.ServiceTemplate.Application.Interfaces;
+using YA.ServiceTemplate.Infrastructure.Data;
+using YA.ServiceTemplate.Infrastructure.Services;
 
 namespace YA.ServiceTemplate
 {
@@ -61,7 +61,7 @@ namespace YA.ServiceTemplate
         {
             return services
                 .AddSingleton<IClockService, ClockService>()
-                .AddSingleton<IRuntimeGeoDataService, SypexRuntimeGeoData>()
+                .AddSingleton<IRuntimeGeoDataService, IpWhoisRuntimeGeoData>()
                 .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
                 .AddHostedService<StartupService>()
                 .AddHostedService<MessageBusService>();

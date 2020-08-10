@@ -11,12 +11,12 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.ApplicationInsights.Sinks.ApplicationInsights.TelemetryConverters;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
@@ -92,7 +92,10 @@ namespace YA.ServiceTemplate
                 RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture, Environment.ProcessorCount);
 
             IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
-            Country = await geoService.GetCountryCodeAsync();
+            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(Timeouts.RuntimeGeoDetectionTimeoutSec)))
+            {
+                Country = await geoService.GetCountryCodeAsync(cts.Token);
+            }
 
             IHostApplicationLifetime hostLifetime = host.Services.GetService<IHostApplicationLifetime>();
             hostLifetime.ApplicationStopping.Register(() =>
@@ -226,7 +229,7 @@ namespace YA.ServiceTemplate
 
             if (!string.IsNullOrEmpty(secrets.AppInsightsInstrumentationKey))
             {
-                loggerConfig.WriteTo.ApplicationInsights(secrets.AppInsightsInstrumentationKey, new TraceTelemetryConverter(), LogEventLevel.Debug);
+                loggerConfig.WriteTo.ApplicationInsights(secrets.AppInsightsInstrumentationKey, TelemetryConverter.Traces, LogEventLevel.Debug);
             }
 
             if (!string.IsNullOrEmpty(secrets.LogzioToken))

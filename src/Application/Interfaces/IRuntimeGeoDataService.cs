@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace YA.ServiceTemplate.Application.Interfaces
 {
@@ -22,6 +23,6 @@ namespace YA.ServiceTemplate.Application.Interfaces
         /// <summary>
         /// Country code of the service location (ISO 3166).
         /// </summary>
-        Task<Countries> GetCountryCodeAsync();
+        Task<Countries> GetCountryCodeAsync(CancellationToken cancellationToken);
     }
 }
