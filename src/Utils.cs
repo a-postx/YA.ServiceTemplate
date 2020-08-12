@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -46,8 +47,9 @@ namespace YA.ServiceTemplate
             if (list.Count > 0)
             {
                 result.Append(list[0]);
+                CultureInfo ci = new CultureInfo("en-US", true);
                 for (int i = 1; i < list.Count; i++)
-                    result.AppendFormat(",{0}", list[i]);
+                    result.AppendFormat(ci, ",{0}", list[i]);
             }
             return result.ToString();
         }

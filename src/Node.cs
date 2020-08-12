@@ -6,20 +6,20 @@ namespace YA.ServiceTemplate
 {
     internal static class Node
     {
-        internal static readonly string Id;
+        internal static readonly string Id = GetOrSetNodeId();
 
-        static Node()
+        private static string GetOrSetNodeId()
         {
             string filePath = Path.Combine(Program.RootPath, General.AppDataFolderName, "nodeid");
 
             if (!File.Exists(filePath))
             {
-                Id = Guid.NewGuid().ToString("N");
                 File.WriteAllText(filePath, Id);
+                return Guid.NewGuid().ToString("N");
             }
             else
             {
-                Id = File.ReadAllText(filePath).Trim();
+                return File.ReadAllText(filePath).Trim();
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace YA.ServiceTemplate.Constants
 {
-    public class CustomClaimNames
+    public static class CustomClaimNames
     {
         public const string client_id = nameof(client_id);
         public const string tid = nameof(tid);

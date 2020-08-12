@@ -32,7 +32,7 @@ namespace YA.ServiceTemplate
         OSX = 4
     }
 
-    public class Program
+    public static class Program
     {
         internal static readonly string AppName = Assembly.GetEntryAssembly()?.GetName().Name;
         internal static readonly Version AppVersion = Assembly.GetEntryAssembly()?.GetName().Version;

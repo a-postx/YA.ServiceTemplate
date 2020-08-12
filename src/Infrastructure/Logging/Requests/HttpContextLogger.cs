@@ -31,7 +31,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
 
         private readonly RequestDelegate _next;
 
-        public async Task InvokeAsync(HttpContext httpContext, IHostEnvironment env, IRuntimeContextAccessor runtimeCtx)
+        public async Task InvokeAsync(HttpContext httpContext, IHostEnvironment env, IHostApplicationLifetime lifetime, IRuntimeContextAccessor runtimeCtx)
         {
             HttpContext context = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
 
@@ -40,7 +40,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                 httpContext.Request.EnableBuffering();
                 Stream body = httpContext.Request.Body;
                 byte[] buffer = new byte[Convert.ToInt32(httpContext.Request.ContentLength, CultureInfo.InvariantCulture)];
-                await httpContext.Request.Body.ReadAsync(buffer, 0, buffer.Length);
+                await httpContext.Request.Body.ReadAsync(buffer.AsMemory(0, buffer.Length), lifetime.ApplicationStopping);
                 string initialRequestBody = Encoding.UTF8.GetString(buffer);
                 body.Seek(0, SeekOrigin.Begin);
                 httpContext.Request.Body = body;
@@ -94,7 +94,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                         context.Response.ContentType = "application/problem+json";
                         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-                        await context.Response.WriteAsync(errorResponseBody);
+                        await context.Response.WriteAsync(errorResponseBody, lifetime.ApplicationStopping);
                     }
 
                     double elapsedMs = GetElapsedMilliseconds(start, Stopwatch.GetTimestamp());
@@ -125,7 +125,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                             .ForContext(Logs.RequestPathAndQuery, GetFullPath(context))
                             .Information("{RequestMethod} {RequestPath} - {StatusCode} in {ElapsedMilliseconds} ms", context.Request.Method, context.Request.Path, context.Response.StatusCode, elapsedMs);
 
-                        await responseBodyMemoryStream.CopyToAsync(originalResponseBodyReference);
+                        await responseBodyMemoryStream.CopyToAsync(originalResponseBodyReference, lifetime.ApplicationStopping);
                     }
                 }
             }

@@ -1,8 +1,8 @@
 ﻿namespace YA.ServiceTemplate.Constants
 {
-    public class MbQueueNames
+    public static class MbQueueNames
     {
-        public static string PrivateServiceQueueName = "ya.servicetemplate." + Node.Id;
+        internal static string PrivateServiceQueueName = "ya.servicetemplate." + Node.Id;
 
         public const string MessageBusPublishQueuePrefix = "servicetemplate";
     }

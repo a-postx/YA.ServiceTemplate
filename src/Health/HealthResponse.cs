@@ -11,7 +11,7 @@ namespace YA.ServiceTemplate.Health
     /// <summary>
     /// JSON formatter for health responses.
     /// </summary>
-    public class HealthResponse
+    public static class HealthResponse
     {
         /// <summary>
         /// Returns a json health status object.

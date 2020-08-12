@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Core.Entities;
 
 namespace YA.ServiceTemplate.Infrastructure.Data
@@ -13,10 +12,10 @@ namespace YA.ServiceTemplate.Infrastructure.Data
     /// </summary>
     public class AppRepository : IAppRepository
     {
-        private static readonly List<ApiRequest> ApiRequests;
-        private static readonly List<Car> Cars;
+        private readonly List<ApiRequest> ApiRequests;
+        private readonly List<Car> Cars;
 
-        static AppRepository()
+        public AppRepository()
         {
             ApiRequests = new List<ApiRequest>();
 

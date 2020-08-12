@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YA.ServiceTemplate", "src\Y
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC76B85B-92BA-4FC4-AA2C-F5E7A4D6E91C}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Message-for-MT-via-RMQ-example.json = Message-for-MT-via-RMQ-example.json
 	EndProjectSection
 EndProject

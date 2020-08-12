@@ -32,7 +32,7 @@ namespace YA.ServiceTemplate.Infrastructure.Services
 
                 _startupHostedServiceHealthCheck.StartupTaskCompleted = true;
                 _log.LogInformation(nameof(StartupService) + " background service has started.");
-            });
+            }, cancellationToken);
 
             return Task.CompletedTask;
         }
