@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Health.Services;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
+using YA.ServiceTemplate.Utils;
 
 namespace YA.ServiceTemplate.Infrastructure.Services
 {
@@ -46,20 +47,17 @@ namespace YA.ServiceTemplate.Infrastructure.Services
 
             while (!success)
             {
-                bool result = false;
-
                 try
                 {
-                    result = await Utils.CheckTcpConnectionAsync(secrets.MessageBusHost, General.MessageBusServiceHealthPort);
+                    success = await TcpConnection.CheckAsync(secrets.MessageBusHost, General.MessageBusServiceHealthPort);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _log.LogError(nameof(MessageBusService) + " background service check has failed: {Exception}", e);
+                    _log.LogError(ex, nameof(MessageBusService) + " background service check has failed");
                 }
 
-                if (result)
+                if (success)
                 {
-                    success = true;
                     _messageBusServiceHealthCheck.MessageBusStartupTaskCompleted = true;
 
                     _log.LogInformation(nameof(MessageBusService) + " background service check succeeded.");

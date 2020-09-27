@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using YA.ServiceTemplate.Extensions;
 
 namespace YA.ServiceTemplate.Health.System
 {
@@ -41,21 +42,21 @@ namespace YA.ServiceTemplate.Health.System
             {
                 networkIsAvailable = await ipAddress.CheckPingAsync();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _log.LogError("Error checking health for Network: {Exception}", e);
+                _log.LogError(ex, "Error checking health for Network");
             }
 
             discoverySw.Stop();
 
-            int networkLatencyValue = (int)discoverySw.ElapsedMilliseconds;
+            int networkCheckTime = (int)discoverySw.ElapsedMilliseconds;
 
             Dictionary<string, object> data = new Dictionary<string, object>
             {
-                { "InternetConnectionLatency", networkLatencyValue }
+                { "InternetConnectionLatency", networkCheckTime }
             };
 
-            HealthStatus status = networkLatencyValue < opts.MaxLatencyThreshold && networkIsAvailable ? HealthStatus.Healthy : HealthStatus.Unhealthy;
+            HealthStatus status = networkCheckTime < opts.MaxLatencyThreshold && networkIsAvailable ? HealthStatus.Healthy : HealthStatus.Unhealthy;
 
             return new HealthCheckResult(status, $"Reports degraded status if no Internet connection available or latency >= {opts.MaxLatencyThreshold} milliseconds.", null, data);
         }

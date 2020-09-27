@@ -48,10 +48,10 @@ namespace YA.ServiceTemplate.Health.Services
                 {
                     healthData.Add("Exception", ex.Message);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _log.LogError("Error checking health for Message Bus: {Exception}", e);
-                    healthData.Add("Exception", e.Message);
+                    _log.LogError(ex, "Error checking health for Message Bus");
+                    healthData.Add("Exception", ex.Message);
                 }
                 finally
                 {

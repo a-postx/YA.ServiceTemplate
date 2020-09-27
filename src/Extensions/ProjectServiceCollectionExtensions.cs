@@ -9,7 +9,7 @@ using YA.ServiceTemplate.Core.Entities;
 using YA.ServiceTemplate.Infrastructure.Data;
 using YA.ServiceTemplate.Infrastructure.Services;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate.Extensions
 {
     /// <summary>
     /// <see cref="IServiceCollection"/> extension methods add project services.
@@ -63,7 +63,6 @@ namespace YA.ServiceTemplate
                 .AddSingleton<IClockService, ClockService>()
                 .AddSingleton<IRuntimeGeoDataService, IpWhoisRuntimeGeoData>()
                 .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
-                .AddHostedService<StartupService>()
                 .AddHostedService<MessageBusService>();
         }
     }

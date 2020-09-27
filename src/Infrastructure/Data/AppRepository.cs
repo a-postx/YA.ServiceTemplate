@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Core.Entities;
+using YA.ServiceTemplate.Extensions;
 
 namespace YA.ServiceTemplate.Infrastructure.Data
 {

@@ -22,6 +22,7 @@ using YA.ServiceTemplate.Application;
 using YA.ServiceTemplate.Application.ActionFilters;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
+using YA.ServiceTemplate.Extensions;
 using YA.ServiceTemplate.Health;
 using YA.ServiceTemplate.Infrastructure.Caching;
 using YA.ServiceTemplate.Infrastructure.Messaging;
@@ -111,6 +112,8 @@ namespace YA.ServiceTemplate
                 .AddProjectMappers()
                 .AddProjectRepositories()
                 .AddProjectServices();
+
+            services.AddHttpClient();
 
             services.AddScoped<IDoSomethingMessageHandler, DoSomethingMessageHandler>();
 

@@ -2,7 +2,7 @@
 using System;
 using YA.ServiceTemplate.Infrastructure.Messaging.Filters;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate.Extensions
 {
     public static class MassTransitPipeConfiguratorExtensions
     {

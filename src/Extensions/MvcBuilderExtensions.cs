@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Http;
 using YA.ServiceTemplate.Application.Interfaces;
 using System.Globalization;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate.Extensions
 {
     internal static class MvcBuilderExtensions
     {

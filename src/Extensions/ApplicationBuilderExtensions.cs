@@ -10,7 +10,7 @@ using YA.ServiceTemplate.Options;
 using Delobytes.AspNetCore;
 using YA.ServiceTemplate.Infrastructure.Logging.Requests;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate.Extensions
 {
     internal static class ApplicationBuilderExtensions
     {

@@ -70,6 +70,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Application\ActionHandlers\" />
     <Folder Include="Connected Services\" />
     <Folder Include="Infrastructure\Caching\" />
     <Folder Include="Infrastructure\Messaging\Filters\" />

@@ -27,7 +27,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using CorrelationId.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate.Extensions
 {
     /// <summary>
     /// <see cref="IServiceCollection"/> extension methods which extend ASP.NET Core services.

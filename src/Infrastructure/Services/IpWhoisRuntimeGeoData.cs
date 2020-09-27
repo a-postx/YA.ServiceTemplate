@@ -1,9 +1,11 @@
-﻿using System;
-using System.Net;
+﻿using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Infrastructure.Services.GeoDataModels;
@@ -12,15 +14,15 @@ namespace YA.ServiceTemplate.Infrastructure.Services
 {
     public class IpWhoisRuntimeGeoData : IRuntimeGeoDataService
     {
-        public IpWhoisRuntimeGeoData(ILogger<IpWhoisRuntimeGeoData> logger)
+        public IpWhoisRuntimeGeoData(ILogger<IpWhoisRuntimeGeoData> logger, IHttpClientFactory httpClientFactory)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
-            ProviderUrl = "https://ipwhois.app/";
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         private readonly ILogger<IpWhoisRuntimeGeoData> _log;
-
-        private string ProviderUrl { get; set; }
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly string _providerUrl = "https://ipwhois.app/";
 
         public async Task<Countries> GetCountryCodeAsync(CancellationToken cancellationToken)
         {
@@ -40,35 +42,33 @@ namespace YA.ServiceTemplate.Infrastructure.Services
             return result;
         }
 
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Handler is disposed with HttpClient")]
         private async Task<IpWhoisGeoData> GetDataAsync(CancellationToken cancellationToken)
         {
             IpWhoisGeoData result = null;
 
             try
             {
-                using (HttpClient client = Utils.GetHttpClient(General.AppHttpUserAgent))
+                HttpClient client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_providerUrl);
+                client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", General.AppHttpUserAgent);
+                client.Timeout = TimeSpan.FromSeconds(60);
+
+                HttpResponseMessage response = await client.GetAsync(new Uri("json/?lang=ru&objects=country_code", UriKind.Relative), cancellationToken);
+                response.EnsureSuccessStatusCode();
+
+                using (Stream responseStream = await response.Content.ReadAsStreamAsync())
                 {
-                    client.BaseAddress = new Uri(ProviderUrl);
+                    IpWhoisGeoData data = await JsonSerializer
+                        .DeserializeAsync<IpWhoisGeoData>(responseStream, null, cancellationToken);
 
-                    using (HttpResponseMessage response = await client.GetAsync(new Uri("json/?lang=ru&objects=country_code", UriKind.Relative), cancellationToken))
+                    if (data != null)
                     {
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            IpWhoisGeoData data = await response.Content.ReadAsJsonAsync<IpWhoisGeoData>();
-
-                            if (data != null)
-                            {
-                                result = data;
-                            }
-                            else
-                            {
-                                _log.LogWarning("No geodata available.");
-                            }
-                        }
-                        else
-                        {
-                            _log.LogWarning("No geodata available, response status code is {Code}.", response.StatusCode);
-                        }
+                        result = data;
+                    }
+                    else
+                    {
+                        _log.LogWarning("No geodata available.");
                     }
                 }
             }

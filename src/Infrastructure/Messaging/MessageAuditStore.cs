@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Constants;
+using YA.ServiceTemplate.Extensions;
 
 namespace YA.ServiceTemplate.Infrastructure.Messaging
 {

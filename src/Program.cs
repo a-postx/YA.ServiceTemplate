@@ -62,9 +62,9 @@ namespace YA.ServiceTemplate
 
                 Console.WriteLine("Host built successfully.");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error building Host: {e}.");
+                Console.WriteLine($"Error building Host: {ex}.");
                 return 1;
             }
 
@@ -72,9 +72,9 @@ namespace YA.ServiceTemplate
             {
                 Log.Logger = CreateLogger(host);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error building logger: {e}.");
+                Console.WriteLine($"Error building logger: {ex}.");
                 return 1;
             }
 
@@ -109,9 +109,9 @@ namespace YA.ServiceTemplate
                 Log.Information("{AppName} has stopped.", AppName);
                 return 0;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Log.Fatal(e, "{AppName} terminated unexpectedly.", AppName);
+                Log.Fatal(ex, "{AppName} terminated unexpectedly.", AppName);
                 return 1;
             }
             finally
