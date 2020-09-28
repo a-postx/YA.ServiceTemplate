@@ -8,6 +8,7 @@
             StatusCode = code;
             Body = body;
         }
+
         public int? StatusCode { get; private set; }
         public string Body { get; private set; }
     }

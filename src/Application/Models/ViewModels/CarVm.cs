@@ -28,6 +28,16 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
         public string Model { get; set; }
 
         /// <summary>
+        /// Object created.
+        /// </summary>
+        public DateTimeOffset Created { get; set; }
+
+        /// <summary>
+        /// Object last modified.
+        /// </summary>
+        public DateTimeOffset Modified { get; set; }
+
+        /// <summary>
         /// URL used to retrieve the resource conforming to REST'ful JSON http://restfuljson.org/.
         /// </summary>
         public Uri Url { get; set; }

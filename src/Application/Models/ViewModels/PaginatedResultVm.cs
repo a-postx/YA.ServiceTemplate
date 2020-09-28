@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
+using YA.ServiceTemplate.Application.Models.Dto;
 
 namespace YA.ServiceTemplate.Application.Models.ViewModels
 {
-    public class PaginatedResult<T> : ValueObject where T : class
+    public class PaginatedResultVm<T> : ValueObject where T : class
     {
-        public PaginatedResult(LinkGenerator linkGenerator, PageOptions pageOptions, bool hasNextPage, bool hasPreviousPage,
+        public PaginatedResultVm(LinkGenerator linkGenerator, PageOptions pageOptions, bool hasNextPage, bool hasPreviousPage,
             int totalCount, string startCursor, string endCursor, HttpContext context, string routeName, List<T> items)
         {
             if (linkGenerator == null)
@@ -31,7 +32,7 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
             }
 
             Items = items ?? new List<T>();
-            PageInfo = new PageInfo()
+            PageInfo = new PageInfoVm()
             {
                 Count = items.Count,
                 HasNextPage = hasNextPage,
@@ -74,7 +75,7 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
 
         public int TotalCount { get; private set; }
 
-        public PageInfo PageInfo { get; private set; }
+        public PageInfoVm PageInfo { get; private set; }
 
         public List<T> Items { get; private set; }
 
@@ -82,7 +83,11 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
         {
             yield return TotalCount;
             yield return PageInfo;
-            yield return Items;
+
+            foreach (T item in Items)
+            {
+                yield return item;
+            }
         }
     }
 }

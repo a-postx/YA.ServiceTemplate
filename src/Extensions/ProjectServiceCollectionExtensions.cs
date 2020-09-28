@@ -1,6 +1,6 @@
 using Delobytes.Mapper;
 using Microsoft.Extensions.DependencyInjection;
-using YA.ServiceTemplate.Application.Commands;
+using YA.ServiceTemplate.Application.ActionHandlers.Cars;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Mappers;
 using YA.ServiceTemplate.Application.Models.SaveModels;
@@ -22,17 +22,17 @@ namespace YA.ServiceTemplate.Extensions
     public static class ProjectServiceCollectionExtensions
     {
         /// <summary>
-        /// Add available commands to the service collection.
+        /// Add available action handlers to the service collection.
         /// </summary>
-        public static IServiceCollection AddProjectCommands(this IServiceCollection services)
+        public static IServiceCollection AddProjectActionHandlers(this IServiceCollection services)
         {
             return services
-                .AddSingleton<IDeleteCarCommand, DeleteCarCommand>()
-                .AddSingleton<IGetCarCommand, GetCarCommand>()
-                .AddSingleton<IGetCarPageCommand, GetCarPageCommand>()
-                .AddSingleton<IPatchCarCommand, PatchCarCommand>()
-                .AddSingleton<IPostCarCommand, PostCarCommand>()
-                .AddSingleton<IPutCarCommand, PutCarCommand>();
+                .AddScoped<IGetCarAh, GetCarAh>()
+                .AddScoped<IGetCarPageAh, GetCarPageAh>()
+                .AddScoped<IPostCarAh, PostCarAh>()
+                .AddScoped<IPutCarAh, PutCarAh>()
+                .AddScoped<IPatchCarAh, PatchCarAh>()
+                .AddScoped<IDeleteCarAh, DeleteCarAh>();
         }
 
         /// <summary>
@@ -63,6 +63,7 @@ namespace YA.ServiceTemplate.Extensions
                 .AddSingleton<IClockService, ClockService>()
                 .AddSingleton<IRuntimeGeoDataService, IpWhoisRuntimeGeoData>()
                 .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
+                .AddScoped<IValidationProblemDetailsGenerator, ValidationProblemDetailsGenerator>()
                 .AddHostedService<MessageBusService>();
         }
     }

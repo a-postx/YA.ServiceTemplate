@@ -2,7 +2,7 @@
 
 ## О проекте
 
-Простой веб-апи сервис, написанный с учётом распределённой архитектуры, который позволит вам быстро начать разработку нового приложения. Демонстрирует использование платформы .Net для создания микросервисных систем.
+Веб-апи сервис, написанный с учётом распределённой архитектуры, который позволит вам быстро начать разработку нового приложения. Демонстрирует использование платформы .Net для создания микросервисных систем.
 
 Приложение полностью готово к
 - использованию вашего любимого ORM-фреймворка вместо репозитория в памяти
@@ -15,12 +15,13 @@
 - Взаимодействие: очереди сообщений (MassTransit + RabbitMQ)
 - Логирование и трассировка: Serilog, ELK, ApplicationInsights
 - Секреты: AWS Parameter Store
+- Валидация моделей: FluentValidation
 - Документация: Swagger (OpenAPI v3)
 
 ## Ключевые особенности
 
 ### Дизайн
-Предметно-ориентированная структура приложения (DDD) отделяет бизнес-логику от инфраструктурного кода. Вся поддерживающая инфраструктура реализована в виде внутренних сервисов.  
+Предметно-ориентированная структура приложения (DDD) отделяет бизнес-логику от ядра и инфраструктуры. Слой команд отделяет бизнес-логику от слоя представления (напр. веб-запроса или события шины данных). Вся поддерживающая инфраструктура реализована в виде внутренних сервисов.
 
 ### Идемпотентность
 При получении дубликата HTTP-запроса приложение выдаёт ошибку 409 (Conflict), чтобы защитить целостность данных.
@@ -121,7 +122,7 @@
 
 ## About
 
-Simple web API service built with distributed architecture in mind. The application shows how to use .Net platform for creating microservice systems and could be a quick start point for creating a new application.
+Web API service built with distributed architecture in mind. The application shows how to use .Net platform for creating microservice systems and could be a quick start point for creating a new application.
 
 Application is ready for
   - using your favourite ORM-framwork instead of in-memory repository
@@ -133,13 +134,14 @@ Application is ready for
 - Communication: message queues (MassTransit + RabbitMQ)
 - Logging and tracing: Serilog, ELK, ApplicationInsights
 - Secrets: AWS Parameter Store
+- Model validation: FluentValidation
 - Documentation: Swagger (OpenAPI v3)
 
 
 ## Features
 
 ### Design
-Domain-driven design (DDD) separated business logic from the support code. All support infrastructure implemented as internal services.  
+Domain-driven design (DDD) separates business logic from core and support code. Command layer separates business logic from presentation layer (ex. web request or message queue event). All support infrastructure is implemented as internal services.
 
 ### Idempotency
 Error code 409 (Conflict) is returned on any duplicate HTTP-call to protect data consistency.

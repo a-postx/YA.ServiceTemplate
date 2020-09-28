@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using YA.ServiceTemplate.Application.Commands;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using Swashbuckle.AspNetCore.Annotations;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.ActionFilters;
+using YA.ServiceTemplate.Application.ActionHandlers.Cars;
+using YA.ServiceTemplate.Application.Models.Dto;
 
 namespace YA.ServiceTemplate.Controllers
 {
@@ -64,7 +65,7 @@ namespace YA.ServiceTemplate.Controllers
         /// <summary>
         /// Delete car with a specified unique identifier.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="carId">Cars unique identifier.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
         /// <returns>204 No Content response if the car was deleted or 404 Not Found if a car with the specified
@@ -74,17 +75,17 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Car with the specified unique identifier was not found.")]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         public Task<IActionResult> DeleteAsync(
-            [FromServices] IDeleteCarCommand command,
+            [FromServices] IDeleteCarAh handler,
             int carId,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(carId, cancellationToken);
+            return handler.ExecuteAsync(carId, cancellationToken);
         }
 
         /// <summary>
         /// Get a car with the specified unique identifier.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="carId">Car unique identifier.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
         /// <returns>200 OK response containing the car or 404 Not Found if a car with the specified unique
@@ -97,17 +98,17 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         public Task<IActionResult> GetAsync(
-            [FromServices] IGetCarCommand command,
+            [FromServices] IGetCarAh handler,
             int carId,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(carId, cancellationToken);
+            return handler.ExecuteAsync(carId, cancellationToken);
         }
 
         /// <summary>
         /// Get a collection of cars using the specified paging options.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="pageOptions">Page options.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
         /// <returns>200 OK response containing a collection of cars, 400 Bad Request if the page request
@@ -115,23 +116,23 @@ namespace YA.ServiceTemplate.Controllers
         /// </returns>
         [HttpGet("", Name = RouteNames.GetCarPage)]
         [HttpHead("", Name = RouteNames.HeadCarPage)]
-        [SwaggerResponse(StatusCodes.Status200OK, "Collection of cars for the specified page.", typeof(PaginatedResult<CarVm>))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Collection of cars for the specified page.", typeof(PaginatedResultVm<CarVm>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Page request parameters are invalid.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Page with the specified page number was not found.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         public Task<IActionResult> GetPageAsync(
-            [FromServices] IGetCarPageCommand command,
+            [FromServices] IGetCarPageAh handler,
             [FromQuery] PageOptions pageOptions,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(pageOptions, cancellationToken);
+            return handler.ExecuteAsync(pageOptions, cancellationToken);
         }
 
         /// <summary>
         /// Patch car with the specified unique identifier.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="carId">Cars unique identifier.</param>
         /// <param name="patch">Patch document. See http://jsonpatch.com.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
@@ -145,18 +146,18 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
         public Task<IActionResult> PatchAsync(
-            [FromServices] IPatchCarCommand command,
+            [FromServices] IPatchCarAh handler,
             int carId,
             [FromBody] JsonPatchDocument<CarSm> patch,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(carId, patch, cancellationToken);
+            return handler.ExecuteAsync(carId, patch, cancellationToken);
         }
 
         /// <summary>
         /// Create a new car.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="car">Car to create.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
         /// <returns>201 Created response containing newly created car or 400 Bad Request if the car is
@@ -168,17 +169,17 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
         public Task<IActionResult> PostAsync(
-            [FromServices] IPostCarCommand command,
+            [FromServices] IPostCarAh handler,
             [FromBody] CarSm car,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(car, cancellationToken);
+            return handler.ExecuteAsync(car, cancellationToken);
         }
 
         /// <summary>
         /// Update existing car with the specified unique identifier.
         /// </summary>
-        /// <param name="command">Action command.</param>
+        /// <param name="handler">Action handler.</param>
         /// <param name="carId">Car identifier.</param>
         /// <param name="car">Car to update.</param>
         /// <param name="cancellationToken">Cancellation token used to cancel the HTTP request.</param>
@@ -192,12 +193,12 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
         public Task<IActionResult> PutAsync(
-            [FromServices] IPutCarCommand command,
+            [FromServices] IPutCarAh handler,
             int carId,
             [FromBody] CarSm car,
             CancellationToken cancellationToken)
         {
-            return command.ExecuteAsync(carId, car, cancellationToken);
+            return handler.ExecuteAsync(carId, car, cancellationToken);
         }
     }
 }

@@ -5,7 +5,7 @@ using GreenPipes;
 using MassTransit;
 using MassTransit.Audit;
 using MassTransit.PrometheusIntegration;
-using MbMessages;
+using MediatR;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -107,13 +107,14 @@ namespace YA.ServiceTemplate
                     .AddCustomMvcOptions(_config)
                     .AddCustomModelValidation();
 
+            services.AddHttpClient();
+            services.AddMediatR(GetType().Assembly);
+
             services
-                .AddProjectCommands()
+                .AddProjectActionHandlers()
                 .AddProjectMappers()
                 .AddProjectRepositories()
                 .AddProjectServices();
-
-            services.AddHttpClient();
 
             services.AddScoped<IDoSomethingMessageHandler, DoSomethingMessageHandler>();
 
@@ -159,8 +160,6 @@ namespace YA.ServiceTemplate
             services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
             services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
             services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-
-            services.AddScoped(provider => provider.GetRequiredService<IBus>().CreateRequestClient<IDoSomethingMessageV1>());
 
             services.AddSingleton<IMessageAuditStore, MessageAuditStore>();
 

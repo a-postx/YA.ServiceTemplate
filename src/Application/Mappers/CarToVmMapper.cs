@@ -38,6 +38,8 @@ namespace YA.ServiceTemplate.Application.Mappers
             destination.Cylinders = source.Cylinders;
             destination.Brand = source.Brand;
             destination.Model = source.Model;
+            destination.Created = source.Created;
+            destination.Modified = source.Modified;
             //property name of anonymous route value object must correspond to controller http route values
             destination.Url = new Uri(_linkGenerator.GetUriByRouteValues(_httpContextAccessor.HttpContext, RouteNames.GetCar, new { source.CarId }));
         }

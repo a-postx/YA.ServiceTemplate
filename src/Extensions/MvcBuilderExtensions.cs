@@ -126,6 +126,9 @@ namespace YA.ServiceTemplate.Extensions
                 .First();
         }
 
+        /// <summary>
+        /// Adds customized model validation settings.
+        /// </summary>
         public static IMvcBuilder AddCustomModelValidation(this IMvcBuilder builder)
         {
             return builder
@@ -141,17 +144,10 @@ namespace YA.ServiceTemplate.Extensions
                 {
                     options.InvalidModelStateResponseFactory = context =>
                     {
-                        IRuntimeContextAccessor runtimeCtx = context.HttpContext.RequestServices.GetRequiredService<IRuntimeContextAccessor>();
+                        IValidationProblemDetailsGenerator generator = context.HttpContext.RequestServices
+                            .GetRequiredService<IValidationProblemDetailsGenerator>();
 
-                        ValidationProblemDetails problemDetails = new ValidationProblemDetails(context.ModelState)
-                        {
-                            Title = "Произошла ошибка валидации данных модели.",
-                            Status = StatusCodes.Status400BadRequest,
-                            Detail = "Обратитесь к свойству errors за дополнительной информацией.",
-                            Instance = context.HttpContext.Request.Path
-                        };
-                        problemDetails.Extensions.Add("correlationId", runtimeCtx.GetCorrelationId());
-                        problemDetails.Extensions.Add("traceId", runtimeCtx.GetTraceId());
+                        ValidationProblemDetails problemDetails = generator.Generate(context.ModelState);
 
                         return new BadRequestObjectResult(problemDetails);
                     };

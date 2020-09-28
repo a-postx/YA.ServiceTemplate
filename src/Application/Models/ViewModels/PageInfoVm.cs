@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace YA.ServiceTemplate.Application.Models.ViewModels
 {
-    public class PageInfo
+    /// <summary>
+    /// Page information
+    /// </summary>
+    public class PageInfoVm
     {
         private const string NextLinkItem = "next";
         private const string PreviousLinkItem = "previous";

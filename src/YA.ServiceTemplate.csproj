@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
-    <Version>0.5.0</Version>
+    <Version>0.6.0</Version>
     <Authors>Alexey Yakubin</Authors>
     <Company>Delobytes</Company>
     <Product>YA.ServiceTemplate</Product>
@@ -37,6 +37,7 @@
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.4" />
     <PackageReference Include="MassTransit.Prometheus" Version="7.0.4" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.4" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServicesIntegration" Version="3.1.8" />
@@ -70,7 +71,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\ActionHandlers\" />
     <Folder Include="Connected Services\" />
     <Folder Include="Infrastructure\Caching\" />
     <Folder Include="Infrastructure\Messaging\Filters\" />
