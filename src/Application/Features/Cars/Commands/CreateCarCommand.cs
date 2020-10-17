@@ -9,7 +9,7 @@ using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars
+namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 {
     public class CreateCarCommand : IRequest<ICommandResult<Car>>
     {

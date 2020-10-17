@@ -12,7 +12,7 @@ using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Validators;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars
+namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 {
     public class UpdateCarCommand : IRequest<ICommandResult<Car>>
     {

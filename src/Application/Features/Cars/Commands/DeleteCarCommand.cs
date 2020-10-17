@@ -7,30 +7,29 @@ using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars
+namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 {
-    public class GetCarCommand : IRequest<ICommandResult<Car>>
+    public class DeleteCarCommand : IRequest<ICommandResult<Empty>>
     {
-        public GetCarCommand(int id)
+        public DeleteCarCommand(int id)
         {
             Id = id;
         }
 
         public int Id { get; protected set; }
 
-        public class GetCarkHandler : IRequestHandler<GetCarCommand, ICommandResult<Car>>
+        public class DeleteCarHandler : IRequestHandler<DeleteCarCommand, ICommandResult<Empty>>
         {
-            public GetCarkHandler(ILogger<GetCarkHandler> logger,
-                IAppRepository carRepository)
+            public DeleteCarHandler(ILogger<DeleteCarHandler> logger, IAppRepository carRepository)
             {
                 _log = logger ?? throw new ArgumentNullException(nameof(logger));
                 _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
             }
 
-            private readonly ILogger<GetCarkHandler> _log;
+            private readonly ILogger<DeleteCarHandler> _log;
             private readonly IAppRepository _carRepository;
 
-            public async Task<ICommandResult<Car>> Handle(GetCarCommand command, CancellationToken cancellationToken)
+            public async Task<ICommandResult<Empty>> Handle(DeleteCarCommand command, CancellationToken cancellationToken)
             {
                 int carId = command.Id;
 
@@ -38,10 +37,12 @@ namespace YA.ServiceTemplate.Application.Features.Cars
 
                 if (car == null)
                 {
-                    return new CommandResult<Car>(CommandStatuses.NotFound, null);
+                    return new CommandResult<Empty>(CommandStatuses.NotFound, null);
                 }
 
-                return new CommandResult<Car>(CommandStatuses.Ok, car);
+                await _carRepository.DeleteAsync(car, cancellationToken);
+                
+                return new CommandResult<Empty>(CommandStatuses.Ok, null);
             }
         }
     }

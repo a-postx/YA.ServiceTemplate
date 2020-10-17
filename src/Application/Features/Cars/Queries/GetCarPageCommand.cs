@@ -11,7 +11,7 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Core;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars
+namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 {
     public class GetCarPageCommand : IRequest<ICommandResult<PaginatedResult<Car>>>
     {
