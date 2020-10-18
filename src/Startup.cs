@@ -116,8 +116,6 @@ namespace YA.ServiceTemplate
                 .AddProjectRepositories()
                 .AddProjectServices();
 
-            services.AddScoped<IDoSomethingMessageHandler, DoSomethingMessageHandler>();
-
             services.AddMassTransit(options =>
             {
                 options.UsingRabbitMq((context, cfg) =>
