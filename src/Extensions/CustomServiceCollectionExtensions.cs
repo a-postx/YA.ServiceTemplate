@@ -175,14 +175,12 @@ namespace YA.ServiceTemplate.Extensions
         public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services)
         {
             services
-                .AddSingleton<StartupServiceHealthCheck>()
                 .AddSingleton<MessageBusServiceHealthCheck>()                
                 .AddHealthChecks()
                     //general system status
                     .AddGenericHealthCheck<UptimeHealthCheck>("uptime")
                     .AddMemoryHealthCheck("memory")
                     //system components regular checks
-                    .AddGenericHealthCheck<StartupServiceHealthCheck>("hosted_startup_service", HealthStatus.Degraded, new[] { "ready" })
                     .AddGenericHealthCheck<MessageBusServiceHealthCheck>("message_bus_service", HealthStatus.Degraded, new[] { "ready" });
                     // Ping is not available on Azure Web Apps
                     //.AddNetworkHealthCheck("network");
