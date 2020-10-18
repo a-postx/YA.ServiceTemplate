@@ -104,8 +104,8 @@
   - /development/messagebusvhost
   - /development/messagebuslogin
   - /development/messagebuspassword
-  - /development/logziotoken
-  - /development/appinsightsinstrumentationkey
+  - /development/logziotoken (опционально)
+  - /development/appinsightsinstrumentationkey (опционально)
 
 * После этого на машине запуска приложения добавьте следующие переменные окружения для подключения приложения к хранилищу:
   - AWS_ACCESS_KEY_ID: {Ключ Доступа}
@@ -223,8 +223,8 @@ If you would like to deploy application on Miscrosoft Azure then you may benefit
   - /development/messagebusvhost
   - /development/messagebuslogin
   - /development/messagebuspassword
-  - /development/logziotoken
-  - /development/appinsightsinstrumentationkey
+  - /development/logziotoken (optional)
+  - /development/appinsightsinstrumentationkey (optional)
 
 * Add AWS keys to environment variables on a machine you're going to launch the application on:
   - AWS_ACCESS_KEY_ID: <AccessKey>

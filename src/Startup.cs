@@ -28,6 +28,7 @@ using YA.ServiceTemplate.Infrastructure.Caching;
 using YA.ServiceTemplate.Infrastructure.Messaging;
 using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
+using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate
 {
@@ -63,15 +64,15 @@ namespace YA.ServiceTemplate
         /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddCustomOptions(_config)
+                .AddOptionsAndSecretsValidationOnStartup();
+
+            AppSecrets secrets = _config.GetSection(nameof(AppSecrets)).Get<AppSecrets>();
+            GeneralOptions generalOptions = _config.GetSection(nameof(ApplicationOptions.General)).Get<GeneralOptions>();
+
             AWSOptions awsOptions = _config.GetAWSOptions();
             services.AddDefaultAWSOptions(awsOptions);
-
-            AppSecrets secrets = _config.Get<AppSecrets>();
-
-            services.Configure<HostOptions>(options =>
-            {
-                options.ShutdownTimeout = TimeSpan.FromSeconds(Timeouts.HostShutdownTimeoutSec);
-            });
 
             if (!string.IsNullOrEmpty(secrets.AppInsightsInstrumentationKey))
             {
@@ -85,11 +86,9 @@ namespace YA.ServiceTemplate
             }
 
             services
-                .AddCorrelationIdFluent()
-
+                .AddCorrelationIdFluent(generalOptions)
                 .AddCustomCaching()
                 .AddCustomCors()
-                .AddCustomOptions(_config)
                 .AddCustomRouting()
                 .AddResponseCaching()
                 .AddCustomResponseCompression(_config)

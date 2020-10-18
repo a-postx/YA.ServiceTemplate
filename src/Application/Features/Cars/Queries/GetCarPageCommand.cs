@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.Dto;
-using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Core;
 using YA.ServiceTemplate.Core.Entities;
+using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 {
@@ -29,14 +30,17 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
         public class GetCarPageHandler : IRequestHandler<GetCarPageCommand, ICommandResult<PaginatedResult<Car>>>
         {
             public GetCarPageHandler(ILogger<GetCarPageHandler> logger,
-                IAppRepository carRepository)
+                IAppRepository carRepository,
+                IOptionsSnapshot<GeneralOptions> options)
             {
                 _log = logger ?? throw new ArgumentNullException(nameof(logger));
                 _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
+                _generalOptions = options.Value;
             }
 
             private readonly ILogger<GetCarPageHandler> _log;
             private readonly IAppRepository _carRepository;
+            private readonly GeneralOptions _generalOptions;
 
             public async Task<ICommandResult<PaginatedResult<Car>>> Handle(GetCarPageCommand command, CancellationToken cancellationToken)
             {
@@ -47,7 +51,7 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
                     return new CommandResult<PaginatedResult<Car>>(CommandStatuses.BadRequest, null);
                 }
 
-                pageOptions.First = !pageOptions.First.HasValue && !pageOptions.Last.HasValue ? General.DefaultPageSizeForPagination : pageOptions.First;
+                pageOptions.First = !pageOptions.First.HasValue && !pageOptions.Last.HasValue ? _generalOptions.DefaultPaginationPageSize : pageOptions.First;
 
                 Task<List<Car>> getCarsTask = GetCarsAsync(pageOptions.First, pageOptions.Last, command.CreatedAfter, command.CreatedBefore, cancellationToken);
                 Task<bool> getHasNextPageTask = GetHasNextPageAsync(pageOptions.First, command.CreatedAfter, command.CreatedBefore, cancellationToken);

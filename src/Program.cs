@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -47,8 +49,6 @@ namespace YA.ServiceTemplate
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 
             OsPlatform = GetOs();
-
-            Directory.CreateDirectory(Path.Combine(RootPath, General.AppDataFolderName));
 
             IHostBuilder builder = CreateHostBuilder(args);
 
@@ -92,7 +92,7 @@ namespace YA.ServiceTemplate
                 RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture, Environment.ProcessorCount);
 
             IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
-            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(Timeouts.RuntimeGeoDetectionTimeoutSec)))
+            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
             {
                 Country = await geoService.GetCountryCodeAsync(cts.Token);
             }
@@ -101,6 +101,13 @@ namespace YA.ServiceTemplate
             hostLifetime.ApplicationStopping.Register(() =>
             {
                 host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Shutdown has been initiated.");
+            });
+
+            IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
+            //вызывается дважды при изменениях на файловой системе https://github.com/dotnet/aspnetcore/issues/2542
+            ChangeToken.OnChange(configuration.GetReloadToken, () =>
+            {
+                host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Options or secrets has been modified.");
             });
 
             try
@@ -170,19 +177,8 @@ namespace YA.ServiceTemplate
 
         private static IConfigurationBuilder AddConfiguration(IConfigurationBuilder configurationBuilder, IHostEnvironment hostingEnvironment, string[] args)
         {
-            configurationBuilder
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-
-                // Add command line options. These take the highest priority.
-                .AddIf(
-                    args != null,
-                    x => x.AddCommandLine(args));
-
             Console.WriteLine("Hosting environment is " + hostingEnvironment.EnvironmentName);
 
-            //<-- опционально
             IConfigurationRoot tempConfig = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
@@ -193,15 +189,31 @@ namespace YA.ServiceTemplate
                 Credentials = credentials,
                 Region = RegionEndpoint.GetBySystemName(tempConfig.GetValue<string>("AWS:Region"))
             };
-            //--/>
+
+            configurationBuilder
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{hostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            string awsSharedParameterStorePath = $"/{hostingEnvironment.EnvironmentName.ToLowerInvariant()}";
 
             configurationBuilder.AddSystemsManager(config =>
             {
                 config.AwsOptions = awsOptions;
                 config.Optional = false;
-                config.Path = hostingEnvironment.IsProduction() ? "/production" : "/development";
-                config.ReloadAfter = new TimeSpan(24, 0, 0);
+                config.Path = awsSharedParameterStorePath;
+                config.ReloadAfter = TimeSpan.FromDays(1);
+                config.OnLoadException += exceptionContext =>
+                {
+                    //log
+                };
             });
+
+            // Добавляем параметры командной строки, которые имеют наивысший приоритет.
+            configurationBuilder
+                .AddIf(
+                    args != null,
+                    x => x.AddCommandLine(args));
 
             return configurationBuilder;
         }
@@ -210,7 +222,7 @@ namespace YA.ServiceTemplate
         {
             IHostEnvironment hostEnv = host.Services.GetRequiredService<IHostEnvironment>();
             IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
-            AppSecrets secrets = configuration.Get<AppSecrets>();
+            AppSecrets secrets = host.Services.GetRequiredService<IOptions<AppSecrets>>().Value;
 
             LoggerConfiguration loggerConfig = new LoggerConfiguration();
 

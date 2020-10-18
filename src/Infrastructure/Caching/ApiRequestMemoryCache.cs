@@ -10,15 +10,15 @@ namespace YA.ServiceTemplate.Infrastructure.Caching
     {
         public ApiRequestMemoryCache()
         {
-            MemoryCacheOptions options = new MemoryCacheOptions { SizeLimit = General.ApiRequestsCacheSize };
-            SetOptions(options);
+            MemoryCacheOptions cacheOptions = new MemoryCacheOptions { SizeLimit = 256 };
+            SetOptions(cacheOptions);
         }
 
         private static readonly MemoryCacheEntryOptions _cacheOptions = new MemoryCacheEntryOptions()
                     .SetSize(1)
                     .SetPriority(CacheItemPriority.High)
-                    .SetSlidingExpiration(TimeSpan.FromSeconds(General.ApiRequestCacheSlidingExpirationSec))
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(General.ApiRequestCacheAbsoluteExpirationSec));
+                    .SetSlidingExpiration(TimeSpan.FromSeconds(120))
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(300));
 
         public async Task<(bool created, T request)> GetOrCreateAsync<T>(Guid key, Func<Task<T>> createItem) where T : class
         {

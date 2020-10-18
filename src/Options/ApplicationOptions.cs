@@ -1,11 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Hosting;
 
 namespace YA.ServiceTemplate.Options
 {
     /// <summary>
-    /// All options for the application.
+    /// Настройки приложения
     /// </summary>
     public class ApplicationOptions
     {
@@ -25,5 +26,15 @@ namespace YA.ServiceTemplate.Options
 
         [Required]
         public KestrelServerOptions Kestrel { get; set; }
+
+        [Required]
+        public HostOptions HostOptions { get; set; }
+
+        // имя соответствует https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-netcore.html
+        [Required]
+        public AwsOptions Aws { get; set; }
+
+        [Required]
+        public GeneralOptions General { get; set; }
     }
 }

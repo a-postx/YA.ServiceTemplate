@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Interfaces;
-using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Infrastructure.Services.GeoDataModels;
 
 namespace YA.ServiceTemplate.Infrastructure.Services
@@ -51,7 +50,8 @@ namespace YA.ServiceTemplate.Infrastructure.Services
             {
                 HttpClient client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri(_providerUrl);
-                client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", General.AppHttpUserAgent);
+                string userAgent = $"{Program.AppName}/{Program.AppVersion}";
+                client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);
                 client.Timeout = TimeSpan.FromSeconds(60);
 
                 HttpResponseMessage response = await client.GetAsync(new Uri("json/?lang=ru&objects=country_code", UriKind.Relative), cancellationToken);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
@@ -26,6 +26,8 @@ using YA.ServiceTemplate.Constants;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using CorrelationId.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.Hosting;
+using YA.ServiceTemplate.Options.Validators;
 
 namespace YA.ServiceTemplate.Extensions
 {
@@ -34,7 +36,7 @@ namespace YA.ServiceTemplate.Extensions
     /// </summary>
     internal static class CustomServiceCollectionExtensions
     {
-        public static IServiceCollection AddCorrelationIdFluent(this IServiceCollection services)
+        public static IServiceCollection AddCorrelationIdFluent(this IServiceCollection services, GeneralOptions generalOptions)
         {
             services.AddDefaultCorrelationId(options =>
             {
@@ -44,8 +46,8 @@ namespace YA.ServiceTemplate.Extensions
                 options.EnforceHeader = false;
                 options.IgnoreRequestHeader = false;
                 options.IncludeInResponse = false;
-                options.RequestHeader = General.CorrelationIdHeader;
-                options.ResponseHeader = General.CorrelationIdHeader;
+                options.RequestHeader = generalOptions.CorrelationIdHeader;
+                options.ResponseHeader = generalOptions.CorrelationIdHeader;
                 options.UpdateTraceIdentifier = false;
             });
 
@@ -86,18 +88,54 @@ namespace YA.ServiceTemplate.Extensions
         }
 
         /// <summary>
-        /// Configures the settings by binding the contents of the appsettings.json file to the specified Plain Old CLR
-        /// Objects (POCO) and adding <see cref="IOptions{T}"/> objects to the services collection.
+        /// Configures the settings and secrets by binding the contents of the files and remote sources
+        /// to the specified POCO and adding <see cref="IOptions{T}"/> objects to the services collection.
         /// </summary>
         public static IServiceCollection AddCustomOptions(this IServiceCollection services, IConfiguration configuration)
         {
-            return services
-                // ConfigureSingleton registers IOptions<T> and also T as a singleton to the services collection.
+            services.AddSingleton<IValidateOptions<HostOptions>, HostOptionsValidator>();
+            services.AddSingleton<IValidateOptions<AwsOptions>, AwsOptionsValidator>();
+            services.AddSingleton<IValidateOptions<GeneralOptions>, GeneralOptionsValidator>();
+            
+            services.AddSingleton<IValidateOptions<AppSecrets>, AppSecretsValidator>();
+
+            services
                 .ConfigureAndValidateSingleton<ApplicationOptions>(configuration, o => o.BindNonPublicProperties = false)
+                .ConfigureAndValidateSingleton<HostOptions>(configuration.GetSection(nameof(ApplicationOptions.HostOptions)), o => o.BindNonPublicProperties = false)
+                .ConfigureAndValidateSingleton<AwsOptions>(configuration.GetSection(nameof(ApplicationOptions.Aws)), o => o.BindNonPublicProperties = false)
                 .ConfigureAndValidateSingleton<CompressionOptions>(configuration.GetSection(nameof(ApplicationOptions.Compression)), o => o.BindNonPublicProperties = false)
                 .ConfigureAndValidateSingleton<ForwardedHeadersOptions>(configuration.GetSection(nameof(ApplicationOptions.ForwardedHeaders)), o => o.BindNonPublicProperties = false)
                 .ConfigureAndValidateSingleton<CacheProfileOptions>(configuration.GetSection(nameof(ApplicationOptions.CacheProfiles)), o => o.BindNonPublicProperties = false)
-                .ConfigureAndValidateSingleton<KestrelServerOptions>(configuration.GetSection(nameof(ApplicationOptions.Kestrel)), o => o.BindNonPublicProperties = false);
+                .ConfigureAndValidateSingleton<KestrelServerOptions>(configuration.GetSection(nameof(ApplicationOptions.Kestrel)), o => o.BindNonPublicProperties = false)
+                .ConfigureAndValidateSingleton<GeneralOptions>(configuration.GetSection(nameof(ApplicationOptions.General)), o => o.BindNonPublicProperties = false)
+                
+                .ConfigureAndValidateSingleton<AppSecrets>(configuration.GetSection(nameof(AppSecrets)), o => o.BindNonPublicProperties = false);
+
+            return services;
+        }
+
+        /// <summary>
+        /// Создаёт экземпляры всех настроек и получает значения, чтобы провести процесс валидации при старте приложения.
+        /// </summary>
+        public static IServiceCollection AddOptionsAndSecretsValidationOnStartup(this IServiceCollection services)
+        {
+            ////перместить валидацию в общий процесс прогрева https://andrewlock.net/reducing-latency-by-pre-building-singletons-in-asp-net-core/
+            try
+            {
+                HostOptions hostOptions = services.BuildServiceProvider().GetService<IOptions<HostOptions>>().Value;
+                AwsOptions awsOptions = services.BuildServiceProvider().GetService<IOptions<AwsOptions>>().Value;
+                ApplicationOptions applicationOptions = services.BuildServiceProvider().GetService<IOptions<ApplicationOptions>>().Value;
+                GeneralOptions generalOptions = services.BuildServiceProvider().GetService<IOptions<GeneralOptions>>().Value;
+                
+                AppSecrets appSecrets = services.BuildServiceProvider().GetService<IOptions<AppSecrets>>().Value;
+            }
+            catch (OptionsValidationException ex)
+            {
+                Console.WriteLine($"Error validating {ex.OptionsType.FullName}: {string.Join(", ", ex.Failures)}");
+                throw;
+            }
+
+            return services;
         }
 
         /// <summary>
@@ -145,7 +183,7 @@ namespace YA.ServiceTemplate.Extensions
                     .AddMemoryHealthCheck("memory")
                     //system components regular checks
                     .AddGenericHealthCheck<StartupServiceHealthCheck>("hosted_startup_service", HealthStatus.Degraded, new[] { "ready" })
-                    .AddGenericHealthCheck<MessageBusServiceHealthCheck>(General.MessageBusServiceHealthCheckName, HealthStatus.Degraded, new[] { "ready" });
+                    .AddGenericHealthCheck<MessageBusServiceHealthCheck>("message_bus_service", HealthStatus.Degraded, new[] { "ready" });
                     // Ping is not available on Azure Web Apps
                     //.AddNetworkHealthCheck("network");
 

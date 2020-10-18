@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
 
 namespace YA.ServiceTemplate.Health.Services
@@ -24,8 +23,6 @@ namespace YA.ServiceTemplate.Health.Services
 
         private readonly ILogger<MessageBusServiceHealthCheck> _log;
         private readonly IBus _bus;
-
-        public string Name => General.MessageBusServiceHealthCheckName;
 
         public bool MessageBusStartupTaskCompleted { get; set; }
 
