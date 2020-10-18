@@ -72,6 +72,10 @@ namespace YA.ServiceTemplate.Infrastructure.Services
                     }
                 }
             }
+            catch (TaskCanceledException ex)
+            {
+                _log.LogWarning($"Unable to get runtime geodata: {ex.Message}");
+            }
             catch (Exception ex)
             {
                 _log.LogError(ex, "Error getting geodata");
