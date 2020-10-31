@@ -13,7 +13,7 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Core.Entities;
 using YA.ServiceTemplate.Options;
 
-namespace YA.ServiceTemplate.Application.ActionFilters
+namespace YA.ServiceTemplate.Application.Middlewares.ActionFilters
 {
     /// <summary>
     /// Фильтр идемпотентности: не допускает запросов без корелляционного идентификатора

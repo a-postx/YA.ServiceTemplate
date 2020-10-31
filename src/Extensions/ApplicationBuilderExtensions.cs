@@ -9,6 +9,7 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Options;
 using Delobytes.AspNetCore;
 using YA.ServiceTemplate.Infrastructure.Logging.Requests;
+using YA.ServiceTemplate.Application.Middlewares;
 
 namespace YA.ServiceTemplate.Extensions
 {
@@ -73,6 +74,12 @@ namespace YA.ServiceTemplate.Extensions
         {
             return application
                 .UseMiddleware<HttpContextLogger>();
+        }
+
+        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder application)
+        {
+            return application
+                .UseMiddleware<HttpExceptionHandler>();
         }
     }
 }

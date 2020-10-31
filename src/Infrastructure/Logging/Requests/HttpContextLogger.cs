@@ -1,27 +1,24 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Context;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Serilog;
-using Serilog.Context;
 using YA.ServiceTemplate.Application.Enums;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
 {
     /// <summary>
-    /// Прослойка логирования HTTP-контекста - запросов, ответов и исключений.
+    /// Прослойка логирования HTTP-контекста - запросов и ответов.
     /// В боевой среде функционал должен быть урезан из соображений безопасности.
     /// </summary>
     public class HttpContextLogger
@@ -34,9 +31,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
         private readonly RequestDelegate _next;
 
         public async Task InvokeAsync(HttpContext httpContext,
-            IHostEnvironment env,
             IHostApplicationLifetime lifetime,
-            IRuntimeContextAccessor runtimeCtx,
             IOptions<GeneralOptions> options)
         {
             HttpContext context = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
@@ -77,32 +72,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
 
                     long start = Stopwatch.GetTimestamp();
 
-                    try
-                    {
-                        await _next(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        string errorMessage = ex.Message;
-                        Log.Error(ex.Demystify(), "{ErrorMessage}", errorMessage);
-
-                        ProblemDetails unknownError = new ProblemDetails
-                        {
-                            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                            Status = StatusCodes.Status500InternalServerError,
-                            Instance = context.Request.HttpContext.Request.Path,
-                            Title = errorMessage,
-                            Detail = env.IsDevelopment() ? ex.Demystify().StackTrace : null
-                        };
-                        unknownError.Extensions.Add("correlationId", runtimeCtx.GetCorrelationId().ToString());
-                        unknownError.Extensions.Add("traceId", runtimeCtx.GetTraceId().ToString());
-
-                        string errorResponseBody = JsonConvert.SerializeObject(unknownError);
-                        context.Response.ContentType = "application/problem+json";
-                        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-                        await context.Response.WriteAsync(errorResponseBody, lifetime.ApplicationStopping);
-                    }
+                    await _next(context);
 
                     double elapsedMs = GetElapsedMilliseconds(start, Stopwatch.GetTimestamp());
 

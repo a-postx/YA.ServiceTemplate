@@ -8,7 +8,7 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using Swashbuckle.AspNetCore.Annotations;
 using YA.ServiceTemplate.Application.Models.SaveModels;
-using YA.ServiceTemplate.Application.ActionFilters;
+using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
 using YA.ServiceTemplate.Application.ActionHandlers.Cars;
 using YA.ServiceTemplate.Application.Models.Dto;
 

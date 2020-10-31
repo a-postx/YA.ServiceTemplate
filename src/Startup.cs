@@ -19,7 +19,7 @@ using Prometheus;
 using System;
 using System.Text;
 using YA.ServiceTemplate.Application;
-using YA.ServiceTemplate.Application.ActionFilters;
+using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Extensions;
@@ -182,7 +182,8 @@ namespace YA.ServiceTemplate
                 .UseResponseCompression()
 
                 .UseHttpContextLogging()
-                
+                .UseCustomExceptionHandler()
+
                 .UseRouting()
                 .UseCors(CorsPolicyName.AllowAny)
                 .UseStaticFilesWithCacheControl()
