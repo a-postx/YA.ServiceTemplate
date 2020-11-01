@@ -106,6 +106,8 @@ namespace YA.ServiceTemplate
                     .AddCustomMvcOptions(_config)
                     .AddCustomModelValidation();
 
+            services.AddCustomProblemDetails();
+
             services.AddHttpClient();
             services.AddMediatR(GetType().Assembly);
 
@@ -181,6 +183,7 @@ namespace YA.ServiceTemplate
                 .UseResponseCaching()
                 .UseResponseCompression()
 
+                .UseNetworkContextLogging()
                 .UseHttpContextLogging()
                 .UseCustomExceptionHandler()
 

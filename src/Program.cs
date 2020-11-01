@@ -1,4 +1,4 @@
-﻿using Amazon;
+using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using Delobytes.AspNetCore;
@@ -26,7 +26,7 @@ using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate
 {
-    enum OsPlatforms
+    internal enum OsPlatforms
     {
         Unknown = 0,
         Windows = 1,

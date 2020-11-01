@@ -1,31 +1,29 @@
-﻿using System.Linq;
+﻿using Delobytes.AspNetCore;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.DependencyInjection;
-using YA.ServiceTemplate.Options;
-using Delobytes.AspNetCore;
-using Microsoft.Extensions.Hosting;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Text.Encodings.Web;
-using System.Text.Unicode;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Converters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Http;
-using YA.ServiceTemplate.Application.Interfaces;
+using Newtonsoft.Json.Converters;
 using System.Globalization;
+using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Unicode;
+using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate.Extensions
 {
     internal static class MvcBuilderExtensions
     {
         /// <summary>
-        /// Adds customized JSON serializer settings.
+        /// Добавляет кастомизированные настройки сериализации JSON.
         /// </summary>
         public static IMvcBuilder AddCustomJsonOptions(this IMvcBuilder builder, IWebHostEnvironment webHostEnvironment)
         {
@@ -45,6 +43,9 @@ namespace YA.ServiceTemplate.Extensions
             });
         }
 
+        /// <summary>
+        /// Добавляет кастомизированные настройки MVC.
+        /// </summary>
         public static IMvcBuilder AddCustomMvcOptions(this IMvcBuilder builder, IConfiguration configuration)
         {
             return builder.AddMvcOptions(options =>
@@ -127,7 +128,7 @@ namespace YA.ServiceTemplate.Extensions
         }
 
         /// <summary>
-        /// Adds customized model validation settings.
+        /// Добавляет кастомизированные настройки валидации моделей и поведения АПИ.
         /// </summary>
         public static IMvcBuilder AddCustomModelValidation(this IMvcBuilder builder)
         {
@@ -142,15 +143,27 @@ namespace YA.ServiceTemplate.Extensions
                 })
                 .ConfigureApiBehaviorOptions(options =>
                 {
-                    options.InvalidModelStateResponseFactory = context =>
-                    {
-                        IValidationProblemDetailsGenerator generator = context.HttpContext.RequestServices
-                            .GetRequiredService<IValidationProblemDetailsGenerator>();
+                    options.SuppressMapClientErrors = true;
+                    //фабрика Деталей Проблемы использует данные для добавления в недооформленные сущности 
+                    options.ClientErrorMapping[400].Title = "Плохой запрос";
+                    options.ClientErrorMapping[400].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/400";
+                    options.ClientErrorMapping[401].Title = "Неавторизован";
+                    options.ClientErrorMapping[401].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/401";
+                    options.ClientErrorMapping[403].Title = "Запрещено";
+                    options.ClientErrorMapping[403].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/403";
+                    options.ClientErrorMapping[404].Title = "Не найдено";
+                    options.ClientErrorMapping[404].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/404";
+                    options.ClientErrorMapping[406].Title = "Неприемлемо";
+                    options.ClientErrorMapping[406].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/406";
+                    options.ClientErrorMapping[409].Title = "Конфликт";
+                    options.ClientErrorMapping[409].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/409";
+                    options.ClientErrorMapping[415].Title = "Не поддерживаемый тип содержимого";
+                    options.ClientErrorMapping[415].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/415";
+                    options.ClientErrorMapping[422].Title = "Необрабатываемая сущность";
+                    options.ClientErrorMapping[422].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/422";
+                    options.ClientErrorMapping[500].Title = "Внутренняя ошибка сервера.";
+                    options.ClientErrorMapping[500].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/500";
 
-                        ValidationProblemDetails problemDetails = generator.Generate(context.ModelState);
-
-                        return new BadRequestObjectResult(problemDetails);
-                    };
                 });
         }
     }

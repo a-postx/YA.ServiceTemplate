@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace YA.ServiceTemplate.Application.Interfaces
@@ -18,7 +18,7 @@ namespace YA.ServiceTemplate.Application.Interfaces
     /// <summary>
     /// Retrieves geodata for the current service.
     /// </summary>
-    interface IRuntimeGeoDataService
+    public interface IRuntimeGeoDataService
     {
         /// <summary>
         /// Country code of the service location (ISO 3166).

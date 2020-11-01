@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +47,9 @@ namespace YA.ServiceTemplate.Extensions
             return application;
         }
 
+        /// <summary>
+        /// Добавляет прослойку для активации уникального пользовательского интерфейса Swagger
+        /// </summary>
         public static IApplicationBuilder UseCustomSwaggerUI(this IApplicationBuilder application)
         {
             return application.UseSwaggerUI(options =>
@@ -70,12 +73,29 @@ namespace YA.ServiceTemplate.Extensions
                 });
         }
 
+        /// <summary>
+        /// Добавляет прослойку логирования сетевого контекста
+        /// </summary>
+        public static IApplicationBuilder UseNetworkContextLogging(this IApplicationBuilder application)
+        {
+            return application
+                .UseMiddleware<NetworkContextLogger>();
+        }
+
+        /// <summary>
+        /// Добавляет прослойку логирования контекста HTTP
+        /// </summary>
         public static IApplicationBuilder UseHttpContextLogging(this IApplicationBuilder application)
         {
             return application
                 .UseMiddleware<HttpContextLogger>();
         }
 
+        /// <summary>
+        /// Добавляет прослойку перехвата исключения в HTTP-контексте. Выводит детали проблемы с дополнительным контекстом.
+        /// Внимание! При отключении этой прослойки все необработанные исключения станут уходить в контекст MVC,
+        /// перестанут выдавать <see cref="ProblemDetails"/> и логироваться в событии завершения запроса.
+        /// </summary>
         public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder application)
         {
             return application

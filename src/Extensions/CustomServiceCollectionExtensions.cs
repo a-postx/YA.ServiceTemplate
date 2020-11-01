@@ -28,6 +28,9 @@ using CorrelationId.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.Hosting;
 using YA.ServiceTemplate.Options.Validators;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using YA.ServiceTemplate.Application.Interfaces;
+using YA.ServiceTemplate.Application;
 
 namespace YA.ServiceTemplate.Extensions
 {
@@ -248,6 +251,18 @@ namespace YA.ServiceTemplate.Extensions
                         options.SwaggerDoc(apiVersionDescription.GroupName, info);
                     }
                 });
+        }
+
+        /// <summary>
+        /// Добавляет кастомизированную фабрику Деталей Проблемы.
+        /// </summary>
+        public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
+        {
+            services
+                .AddTransient<IProblemDetailsFactory, CustomProblemDetailsFactory>()
+                .AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
+
+            return services;
         }
     }
 }

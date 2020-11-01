@@ -3,6 +3,7 @@
     public static class Logs
     {
         public const string CorrelationId = nameof(CorrelationId);
+        public const string ClientIp = nameof(ClientIp);
         public const string MbMessage = nameof(MbMessage);
         public const string TenantId = nameof(TenantId);
         public const string UserId = nameof(UserId);

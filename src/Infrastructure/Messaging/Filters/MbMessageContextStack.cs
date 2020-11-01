@@ -15,12 +15,12 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging.Filters
         /// <returns></returns>
         public static IDisposable Push(PipeContext context)
         {
-            return MbMessageAsyncLocalStack<PipeContext>.Push(context);
+            return MbMessageAsyncLocalStackWrapper<PipeContext>.Push(context);
         }
 
         /// <summary>
         /// Gets the current <see cref="PipeContext"/>.
         /// </summary>
-        public static PipeContext Current => MbMessageAsyncLocalStack<PipeContext>.Current;
+        public static PipeContext Current => MbMessageAsyncLocalStackWrapper<PipeContext>.Current;
     }
 }

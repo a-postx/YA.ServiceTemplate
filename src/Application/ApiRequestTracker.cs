@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,20 +69,20 @@ namespace YA.ServiceTemplate.Application
             }
         }
 
-        public async Task SetResultAsync(ApiRequest request, ApiRequestResult result, CancellationToken cancellationToken)
+        public async Task SetResultAsync(ApiRequest request, ApiRequestResult requestResult, CancellationToken cancellationToken)
         {
             if (request == null)
             {
-                throw new Exception("Api request cannot be empty.");
+                throw new ArgumentNullException(nameof(request));
             }
 
-            if (result == null)
+            if (requestResult == null)
             {
-                throw new Exception("Api request result cannot be empty.");
+                throw new ArgumentNullException(nameof(requestResult));
             }
 
-            request.SetResponseStatusCode(result.StatusCode);
-            request.SetResponseBody((result.Body != null) ? JToken.Parse(JsonConvert.SerializeObject(result.Body)).ToString(Formatting.Indented) : null);
+            request.SetResponseStatusCode(requestResult.StatusCode);
+            request.SetResponseBody(string.IsNullOrEmpty(requestResult.Body) ? null : requestResult.Body);
             
             await _apiRequestRepository.UpdateApiRequestAsync(request);
 
