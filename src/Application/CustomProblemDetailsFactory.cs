@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +26,7 @@ namespace YA.ServiceTemplate.Application
 
         /// <inheritdoc />
         public override ProblemDetails CreateProblemDetails(
-            HttpContext context,
+            HttpContext httpContext,
             int? statusCode = null,
             string title = null,
             string type = null,
@@ -45,33 +45,33 @@ namespace YA.ServiceTemplate.Application
             };
 
             ApplyProblemDetailsDefaults(problemDetails, statusCode.Value);
-            EnrichProblemDetailsWithContext(context, problemDetails);
+            EnrichProblemDetailsWithContext(httpContext, problemDetails);
 
             return problemDetails;
         }
 
         /// <inheritdoc />
-        public override ValidationProblemDetails CreateValidationProblemDetails(HttpContext context,
-            ModelStateDictionary modelState,
+        public override ValidationProblemDetails CreateValidationProblemDetails(HttpContext httpContext,
+            ModelStateDictionary modelStateDictionary,
             int? statusCode = null,
             string title = null,
             string type = null,
             string detail = null,
             string instance = null)
         {
-            if (modelState == null)
+            if (modelStateDictionary == null)
             {
-                throw new ArgumentNullException(nameof(modelState));
+                throw new ArgumentNullException(nameof(modelStateDictionary));
             }
 
             statusCode ??= StatusCodes.Status400BadRequest;
 
-            ValidationProblemDetails problemDetails = new ValidationProblemDetails(modelState)
+            ValidationProblemDetails problemDetails = new ValidationProblemDetails(modelStateDictionary)
             {
                 Title = "Произошла ошибка валидации данных модели.",
                 Status = StatusCodes.Status400BadRequest,
                 Detail = "Обратитесь к свойству errors за дополнительной информацией.",
-                Instance = context.Request.Path,
+                Instance = httpContext.Request.Path,
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
             };
 
@@ -82,7 +82,7 @@ namespace YA.ServiceTemplate.Application
             }
 
             ApplyProblemDetailsDefaults(problemDetails, statusCode.Value);
-            EnrichProblemDetailsWithContext(context, problemDetails);
+            EnrichProblemDetailsWithContext(httpContext, problemDetails);
 
             return problemDetails;
         }

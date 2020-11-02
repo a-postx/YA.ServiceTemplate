@@ -1,8 +1,9 @@
-﻿using CorrelationId.Abstractions;
+using CorrelationId.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using YA.ServiceTemplate.Application.Exceptions;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Infrastructure.Messaging.Filters;
 
@@ -29,7 +30,7 @@ namespace YA.ServiceTemplate.Infrastructure.Services
 
             if (_correlationCtx.CorrelationContext != null && mbMessageContext != null)
             {
-                throw new Exception("Cannot obtain CorrelationID: both contexts are presented.");
+                throw new CorrelationIdNotFoundException("Cannot obtain CorrelationID: both contexts are presented.");
             }
 
             if (_correlationCtx.CorrelationContext == null && mbMessageContext == null)
@@ -55,13 +56,13 @@ namespace YA.ServiceTemplate.Infrastructure.Services
             {
                 if (mbMessageContext.CorrelationId == Guid.Empty)
                 {
-                    throw new Exception("Cannot obtain CorrelationID from message bus message.");
+                    throw new CorrelationIdNotFoundException("Cannot obtain CorrelationID from message bus message.");
                 }
 
                 return mbMessageContext.CorrelationId;
             }
 
-            throw new Exception("Cannot obtain CorrelationID.");
+            throw new CorrelationIdNotFoundException("Cannot obtain CorrelationID: no context.");
         }
 
         public string GetTraceId()

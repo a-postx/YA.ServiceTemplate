@@ -108,9 +108,6 @@ dotnet_diagnostic.CA1308.severity = suggestion
 # CA2208: Instantiate argument exceptions correctly
 dotnet_diagnostic.CA2208.severity = suggestion
 
-# CA1027: Mark enums with FlagsAttribute
-dotnet_diagnostic.CA1027.severity = suggestion
-
 # CA1034: Nested types should not be visible
 dotnet_diagnostic.CA1034.severity = suggestion
 
@@ -127,6 +124,19 @@ dotnet_diagnostic.IDE1006.severity = silent
 
 # .NET Code Style Settings
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#net-code-style-settings
+
+# CA1019: Define accessors for attribute arguments
+dotnet_diagnostic.CA1019.severity = suggestion
+
+# CA1725: Parameter names should match base declaration
+dotnet_diagnostic.CA1725.severity = suggestion
+
+# CA1813: Avoid unsealed attributes
+dotnet_diagnostic.CA1813.severity = suggestion
+
+# CA1027: Mark enums with FlagsAttribute
+dotnet_diagnostic.CA1027.severity = suggestion
+
 [*.{cs,csx,cake,vb,vbx}]
 # "this." and "Me." qualifiers
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#this-and-me

@@ -1,4 +1,4 @@
-﻿using MassTransit.Audit;
+using MassTransit.Audit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -27,7 +27,7 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging
 
         public Task StoreMessage<T>(T message, MessageAuditMetadata metadata) where T : class
         {
-            string savedMessage = JsonSerializer.Serialize(message);
+            string savedMessage = JsonSerializer.Serialize(message, new JsonSerializerOptions { WriteIndented = true });
 
             //logz.io/logstash fields can accept only 32k strings so request/response bodies are cut
             if (savedMessage.Length > _maxLogFieldLength)

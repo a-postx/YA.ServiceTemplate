@@ -1,36 +1,43 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using CorrelationId.DependencyInjection;
+using Delobytes.AspNetCore;
+using Delobytes.AspNetCore.Swagger;
+using Delobytes.AspNetCore.Swagger.OperationFilters;
+using Delobytes.AspNetCore.Swagger.SchemaFilters;
+using GreenPipes;
+using MassTransit;
+using MassTransit.Audit;
+using MassTransit.PrometheusIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Delobytes.AspNetCore;
-using Delobytes.AspNetCore.Swagger;
-using Delobytes.AspNetCore.Swagger.OperationFilters;
-using Delobytes.AspNetCore.Swagger.SchemaFilters;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
+using YA.ServiceTemplate.Application;
+using YA.ServiceTemplate.Application.Interfaces;
+using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Health;
-using YA.ServiceTemplate.Health.System;
 using YA.ServiceTemplate.Health.Services;
+using YA.ServiceTemplate.Health.System;
+using YA.ServiceTemplate.Infrastructure.Messaging;
+using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
+using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
 using YA.ServiceTemplate.OperationFilters;
 using YA.ServiceTemplate.Options;
-using Microsoft.OpenApi.Models;
-using YA.ServiceTemplate.Constants;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using CorrelationId.DependencyInjection;
-using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.Extensions.Hosting;
 using YA.ServiceTemplate.Options.Validators;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using YA.ServiceTemplate.Application.Interfaces;
-using YA.ServiceTemplate.Application;
 
 namespace YA.ServiceTemplate.Extensions
 {
@@ -155,8 +162,7 @@ namespace YA.ServiceTemplate.Extensions
                     // Add additional MIME types (other than the built in defaults) to enable GZIP compression for.
                     IEnumerable<string> customMimeTypes = configuration
                         .GetSection(nameof(ApplicationOptions.Compression))
-                        .Get<CompressionOptions>()
-                        ?.MimeTypes ?? Enumerable.Empty<string>();
+                        .Get<CompressionOptions>()?.MimeTypes ?? Enumerable.Empty<string>();
                     options.MimeTypes = customMimeTypes.Concat(ResponseCompressionDefaults.MimeTypes);
 
                     options.Providers.Add<BrotliCompressionProvider>();
@@ -251,6 +257,67 @@ namespace YA.ServiceTemplate.Extensions
                         options.SwaggerDoc(apiVersionDescription.GroupName, info);
                     }
                 });
+        }
+
+        /// <summary>
+        /// Добавляет шину данных МассТранзит.
+        /// </summary>
+        public static IServiceCollection AddMessageBus(this IServiceCollection services, AppSecrets secrets)
+        {
+            services.AddSingleton<IMessageAuditStore, MessageAuditStore>();
+
+            services.AddMassTransit(options =>
+            {
+                options.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(secrets.MessageBusHost, secrets.MessageBusVHost, h =>
+                    {
+                        h.Username(secrets.MessageBusLogin);
+                        h.Password(secrets.MessageBusPassword);
+                    });
+
+                    IMessageAuditStore auditStore = context.GetRequiredService<IMessageAuditStore>();
+                    cfg.ConnectSendAuditObservers(auditStore, c => c.Exclude(typeof(IServiceTemplateTestRequestV1), typeof(IServiceTemplateTestResponseV1)));
+                    cfg.ConnectConsumeAuditObserver(auditStore, c => c.Exclude(typeof(IServiceTemplateTestRequestV1), typeof(IServiceTemplateTestResponseV1)));
+
+                    cfg.UseHealthCheck(context);
+
+                    cfg.UseSerilogMessagePropertiesEnricher();
+                    cfg.UsePrometheusMetrics();
+
+                    cfg.ReceiveEndpoint(MbQueueNames.PrivateServiceQueueName, e =>
+                    {
+                        e.PrefetchCount = 16;
+                        e.UseMessageRetry(x => x.Interval(2, 500));
+                        e.AutoDelete = true;
+                        e.Durable = false;
+                        e.ExchangeType = "fanout";
+                        e.Exclusive = true;
+                        e.ExclusiveConsumer = true;
+
+                        e.ConfigureConsumer<TestRequestConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint("ya.servicetemplate.receiveendpoint", e =>
+                    {
+                        e.PrefetchCount = 16;
+                        e.UseMessageRetry(x => x.Interval(2, 100));
+                        e.UseMbContextFilter();
+
+                        e.ConfigureConsumer<DoSomethingConsumer>(context);
+                    });
+                });
+
+                options.AddConsumers(Assembly.GetExecutingAssembly());
+            });
+
+            services.AddMassTransitHostedService();
+
+            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+
+            return services;
         }
 
         /// <summary>

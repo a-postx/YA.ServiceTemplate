@@ -1,4 +1,4 @@
-﻿using Delobytes.Mapper;
+using Delobytes.Mapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

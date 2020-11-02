@@ -1,6 +1,5 @@
-﻿using MassTransit;
+using MassTransit;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,16 +14,12 @@ namespace YA.ServiceTemplate.Health.Services
     /// </summary>
     public class MessageBusServiceHealthCheck : IHealthCheck
     {
-        public MessageBusServiceHealthCheck(ILogger<MessageBusServiceHealthCheck> logger, IBus bus)
+        public MessageBusServiceHealthCheck(IBus bus)
         {
-            _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _bus = bus ?? throw new ArgumentNullException(nameof(bus));
         }
 
-        private readonly ILogger<MessageBusServiceHealthCheck> _log;
         private readonly IBus _bus;
-
-        public bool MessageBusStartupTaskCompleted { get; set; }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
@@ -32,38 +27,27 @@ namespace YA.ServiceTemplate.Health.Services
             Response<IServiceTemplateTestResponseV1> response = null;
             Dictionary<string, object> healthData = new Dictionary<string, object>();
 
-            if (MessageBusStartupTaskCompleted)
-            {
-                Stopwatch mbSw = new Stopwatch();
-                mbSw.Start();
+            Stopwatch mbSw = new Stopwatch();
+            mbSw.Start();
 
-                try
-                {
-                    response = await _bus.Request<IServiceTemplateTestRequestV1, IServiceTemplateTestResponseV1>(new { TimeStamp = now }, cancellationToken);
-                }
-                catch (RequestException ex)
-                {
-                    healthData.Add("Exception", ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    _log.LogError(ex, "Error checking health for Message Bus");
-                    healthData.Add("Exception", ex.Message);
-                }
-                finally
-                {
-                    mbSw.Stop();
-                    healthData.Add("Delay, msec", mbSw.ElapsedMilliseconds);
-                }
-
-                return (response?.Message?.GotIt == now) ?
-                    HealthCheckResult.Healthy("Message Bus is available.", healthData) : 
-                    HealthCheckResult.Unhealthy("Message Bus is unavailable.", null, healthData);
-            }
-            else
+            try
             {
-                return HealthCheckResult.Unhealthy("Message Bus is unavailable.", null, healthData);
+                response = await _bus
+                    .Request<IServiceTemplateTestRequestV1, IServiceTemplateTestResponseV1>(new { TimeStamp = now }, cancellationToken);
             }
+            catch (RequestException ex)
+            {
+                healthData.Add("Exception", ex.Message);
+            }
+            finally
+            {
+                mbSw.Stop();
+                healthData.Add("Delay, msec", mbSw.ElapsedMilliseconds);
+            }
+
+            return (response?.Message?.GotIt == now) ?
+                HealthCheckResult.Healthy("Message Bus is available.", healthData) : 
+                HealthCheckResult.Unhealthy("Message Bus is unavailable.", null, healthData);
         }
     }
 }

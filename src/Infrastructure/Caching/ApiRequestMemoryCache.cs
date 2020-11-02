@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using YA.ServiceTemplate.Application.Interfaces;
-using YA.ServiceTemplate.Constants;
 
 namespace YA.ServiceTemplate.Infrastructure.Caching
 {

@@ -1,10 +1,8 @@
+using System;
+using System.Text;
 using Amazon.Extensions.NETCore.Setup;
 using CorrelationId;
 using Delobytes.AspNetCore;
-using GreenPipes;
-using MassTransit;
-using MassTransit.Audit;
-using MassTransit.PrometheusIntegration;
 using MediatR;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -16,18 +14,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using System;
-using System.Text;
 using YA.ServiceTemplate.Application;
-using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
 using YA.ServiceTemplate.Application.Interfaces;
+using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Extensions;
 using YA.ServiceTemplate.Health;
 using YA.ServiceTemplate.Infrastructure.Caching;
-using YA.ServiceTemplate.Infrastructure.Messaging;
-using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
-using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
 using YA.ServiceTemplate.Options;
 
 namespace YA.ServiceTemplate
@@ -117,50 +110,7 @@ namespace YA.ServiceTemplate
                 .AddProjectRepositories()
                 .AddProjectServices();
 
-            services.AddMassTransit(options =>
-            {
-                options.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(secrets.MessageBusHost, secrets.MessageBusVHost, h =>
-                    {
-                        h.Username(secrets.MessageBusLogin);
-                        h.Password(secrets.MessageBusPassword);
-                    });
-
-                    cfg.UseSerilogMessagePropertiesEnricher();
-                    cfg.UsePrometheusMetrics();
-
-                    cfg.ReceiveEndpoint(MbQueueNames.PrivateServiceQueueName, e =>
-                    {
-                        e.PrefetchCount = 16;
-                        e.UseMessageRetry(x => x.Interval(2, 500));
-                        e.AutoDelete = true;
-                        e.Durable = false;
-                        e.ExchangeType = "fanout";
-                        e.Exclusive = true;
-                        e.ExclusiveConsumer = true;
-
-                        e.ConfigureConsumer<TestRequestConsumer>(context);
-                    });
-
-                    cfg.ReceiveEndpoint("ya.servicetemplate.receiveendpoint", e =>
-                    {
-                        e.PrefetchCount = 16;
-                        e.UseMessageRetry(x => x.Interval(2, 100));
-                        e.UseMbContextFilter();
-
-                        e.ConfigureConsumer<DoSomethingConsumer>(context);
-                    });
-                });
-                
-                options.AddConsumers(GetType().Assembly);
-            });
-
-            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
-            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
-            services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-
-            services.AddSingleton<IMessageAuditStore, MessageAuditStore>();
+            services.AddMessageBus(secrets);
 
             services.AddScoped<ApiRequestFilter>();
             services.AddScoped<IApiRequestTracker, ApiRequestTracker>();

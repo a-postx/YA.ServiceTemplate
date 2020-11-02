@@ -1,4 +1,4 @@
-﻿using Delobytes.Mapper;
+using Delobytes.Mapper;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -22,20 +22,20 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
             IActionContextAccessor actionCtx,
             IMediator mediator,
             IMapper<Car, CarVm> carToCarVmMapper,
-            IValidationProblemDetailsGenerator generator)
+            IProblemDetailsFactory problemDetailsFactory)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _actionCtx = actionCtx ?? throw new ArgumentNullException(nameof(actionCtx));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _carToCarVmMapper = carToCarVmMapper ?? throw new ArgumentNullException(nameof(carToCarVmMapper));
-            _problemDetailsGenerator = generator ?? throw new ArgumentNullException(nameof(generator));
+            _pdFactory = problemDetailsFactory ?? throw new ArgumentNullException(nameof(problemDetailsFactory));
         }
 
         private readonly ILogger<PatchCarAh> _log;
         private readonly IActionContextAccessor _actionCtx;
         private readonly IMediator _mediator;
         private readonly IMapper<Car, CarVm> _carToCarVmMapper;
-        private readonly IValidationProblemDetailsGenerator _problemDetailsGenerator;
+        private readonly IProblemDetailsFactory _pdFactory;
 
         public async Task<IActionResult> ExecuteAsync(int carId, JsonPatchDocument<CarSm> patch, CancellationToken cancellationToken)
         {
@@ -48,7 +48,8 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
                 default:
                     throw new ArgumentOutOfRangeException(nameof(result.Status), result.Status, null);
                 case CommandStatuses.ModelInvalid:
-                    ValidationProblemDetails problemDetails = _problemDetailsGenerator.Generate(result.ValidationResult);
+                    ValidationProblemDetails problemDetails = _pdFactory
+                        .CreateValidationProblemDetails(_actionCtx.ActionContext.HttpContext, result.ValidationResult);
                     return new BadRequestObjectResult(problemDetails);
                 case CommandStatuses.NotFound:
                     return new NotFoundResult();

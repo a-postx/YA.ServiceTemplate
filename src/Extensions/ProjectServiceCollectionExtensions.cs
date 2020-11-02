@@ -62,9 +62,7 @@ namespace YA.ServiceTemplate.Extensions
             return services
                 .AddSingleton<IClockService, ClockService>()
                 .AddSingleton<IRuntimeGeoDataService, IpWhoisRuntimeGeoData>()
-                .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
-                .AddScoped<IValidationProblemDetailsGenerator, ValidationProblemDetailsGenerator>()
-                .AddHostedService<MessageBusService>();
+                .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>();
         }
     }
 }
