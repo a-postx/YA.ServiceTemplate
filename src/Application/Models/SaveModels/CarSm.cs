@@ -1,8 +1,12 @@
+using Swashbuckle.AspNetCore.Annotations;
+using YA.ServiceTemplate.Application.Models.ModelSchemaFilters;
+
 namespace YA.ServiceTemplate.Application.Models.SaveModels
 {
     /// <summary>
     /// Car model coming from external API call.
     /// </summary>
+    [SwaggerSchemaFilter(typeof(CarSmSchemaFilter))]
     public class CarSm
     {
         /// <summary>

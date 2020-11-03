@@ -9,15 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using YA.ServiceTemplate.Application.Interfaces;
 
-namespace YA.ServiceTemplate.Application
+namespace YA.ServiceTemplate.Infrastructure.Services
 {
     /// <summary>
 	/// Обработчик стандартного вывода деталей проблемы HTTP-запроса
 	/// </summary>
-	public class CustomProblemDetailsFactory : ProblemDetailsFactory, IProblemDetailsFactory
+	public class YaProblemDetailsFactory : ProblemDetailsFactory, IProblemDetailsFactory
     {
         /// <inheritdoc />
-        public CustomProblemDetailsFactory(IOptions<ApiBehaviorOptions> options)
+        public YaProblemDetailsFactory(IOptions<ApiBehaviorOptions> options)
         {
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
@@ -33,6 +33,11 @@ namespace YA.ServiceTemplate.Application
             string detail = null,
             string instance = null)
         {
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             statusCode ??= StatusCodes.Status500InternalServerError;
 
             ProblemDetails problemDetails = new ProblemDetails
@@ -59,27 +64,30 @@ namespace YA.ServiceTemplate.Application
             string detail = null,
             string instance = null)
         {
-            if (modelStateDictionary == null)
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            if (modelStateDictionary is null)
             {
                 throw new ArgumentNullException(nameof(modelStateDictionary));
             }
 
             statusCode ??= StatusCodes.Status400BadRequest;
+            title ??= "Произошла ошибка валидации данных модели.";
+            detail ??= "Обратитесь к свойству errors за дополнительной информацией.";
+            instance ??= httpContext.Request.Path;
+            type ??= "https://tools.ietf.org/html/rfc7231#section-6.5.1";
 
             ValidationProblemDetails problemDetails = new ValidationProblemDetails(modelStateDictionary)
             {
-                Title = "Произошла ошибка валидации данных модели.",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = "Обратитесь к свойству errors за дополнительной информацией.",
-                Instance = httpContext.Request.Path,
-                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+                Title = title,
+                Status = statusCode,
+                Detail = detail,
+                Instance = instance,
+                Type = type
             };
-
-            if (title != null)
-            {
-                // For validation problem details, don't overwrite the default title with null.
-                problemDetails.Title = title;
-            }
 
             ApplyProblemDetailsDefaults(problemDetails, statusCode.Value);
             EnrichProblemDetailsWithContext(httpContext, problemDetails);
@@ -87,7 +95,7 @@ namespace YA.ServiceTemplate.Application
             return problemDetails;
         }
 
-        public ValidationProblemDetails CreateValidationProblemDetails(HttpContext context,
+        public ValidationProblemDetails CreateValidationProblemDetails(HttpContext httpContext,
             ValidationResult validationResult,
             int? statusCode = null,
             string title = null,
@@ -95,10 +103,20 @@ namespace YA.ServiceTemplate.Application
             string detail = null,
             string instance = null)
         {
-            IActionContextAccessor actionCtx = context.RequestServices.GetRequiredService<IActionContextAccessor>();
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            if (validationResult is null)
+            {
+                throw new ArgumentNullException(nameof(validationResult));
+            }
+
+            IActionContextAccessor actionCtx = httpContext.RequestServices.GetRequiredService<IActionContextAccessor>();
 
             validationResult.AddToModelState(actionCtx.ActionContext.ModelState, "");
-            return CreateValidationProblemDetails(context, actionCtx.ActionContext.ModelState, statusCode, title, type, detail, instance);
+            return CreateValidationProblemDetails(httpContext, actionCtx.ActionContext.ModelState, statusCode, title, type, detail, instance);
         }
 
         private void ApplyProblemDetailsDefaults(ProblemDetails problemDetails, int statusCode)

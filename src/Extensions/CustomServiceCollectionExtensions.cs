@@ -26,7 +26,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
-using YA.ServiceTemplate.Application;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Health;
@@ -35,6 +34,7 @@ using YA.ServiceTemplate.Health.System;
 using YA.ServiceTemplate.Infrastructure.Messaging;
 using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
+using YA.ServiceTemplate.Infrastructure.Services;
 using YA.ServiceTemplate.OperationFilters;
 using YA.ServiceTemplate.Options;
 using YA.ServiceTemplate.Options.Validators;
@@ -326,8 +326,8 @@ namespace YA.ServiceTemplate.Extensions
         public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
         {
             services
-                .AddTransient<IProblemDetailsFactory, CustomProblemDetailsFactory>()
-                .AddTransient<ProblemDetailsFactory, CustomProblemDetailsFactory>();
+                .AddTransient<IProblemDetailsFactory, YaProblemDetailsFactory>()
+                .AddTransient<ProblemDetailsFactory, YaProblemDetailsFactory>();
 
             return services;
         }
