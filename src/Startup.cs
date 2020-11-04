@@ -110,7 +110,7 @@ namespace YA.ServiceTemplate
                 .AddProjectRepositories()
                 .AddProjectServices();
 
-            services.AddMessageBus(secrets);
+            services.AddCustomMessageBus(secrets);
 
             services.AddScoped<ApiRequestFilter>();
             services.AddScoped<IApiRequestTracker, ApiRequestTracker>();

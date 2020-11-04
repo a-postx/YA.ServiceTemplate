@@ -1,4 +1,4 @@
-﻿namespace YA.ServiceTemplate.Constants
+namespace YA.ServiceTemplate.Constants
 {
     public static class Logs
     {
@@ -20,6 +20,7 @@
         public const string RequestPathAndQuery = nameof(RequestPathAndQuery);
         public const string RequestHeaders = nameof(RequestHeaders);
         public const string RequestBody = nameof(RequestBody);
+        public const string RequestAborted = nameof(RequestAborted);
         public const string StatusCode = nameof(StatusCode);
         public const string ResponseHeaders = nameof(ResponseHeaders);
         public const string ResponseBody = nameof(ResponseBody);

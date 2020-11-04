@@ -1,4 +1,4 @@
-﻿using Delobytes.AspNetCore;
+using Delobytes.AspNetCore;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.JsonPatch;
@@ -164,7 +164,13 @@ namespace YA.ServiceTemplate.Extensions
                     options.ClientErrorMapping[500].Title = "Внутренняя ошибка сервера.";
                     options.ClientErrorMapping[500].Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/500";
 
-                });
+                    options.ClientErrorMapping[412] = new ClientErrorData
+                    {
+                        Title = "Предусловие не выполнено",
+                        Link = "https://wiki.developer.mozilla.org/ru/docs/Web/HTTP/Status/412",
+                    };
+
+        });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -29,16 +29,28 @@ namespace YA.ServiceTemplate.Application.Middlewares
             {
                 await _next(context);
             }
+            catch (OperationCanceledException ex)
+            {
+                if (!context.RequestAborted.IsCancellationRequested)
+                {
+                    await WriteProblemDetails(context, detailsFactory, lifetime, ex);
+                }
+            }
             catch (Exception ex)
             {
-                ProblemDetails unknownError = detailsFactory.CreateProblemDetails(context, StatusCodes.Status500InternalServerError,
-                    ex.Message, null, ex.Demystify().StackTrace, context.Request.HttpContext.Request.Path);
-
-                context.Response.ContentType = "application/problem+json";
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-                await JsonSerializer.SerializeAsync(context.Response.Body, unknownError, null, lifetime.ApplicationStopping);
+                await WriteProblemDetails(context, detailsFactory, lifetime, ex);
             }
+        }
+
+        private static async Task WriteProblemDetails(HttpContext context, IProblemDetailsFactory detailsFactory, IHostApplicationLifetime lifetime, Exception ex)
+        {
+            ProblemDetails problemDetails = detailsFactory.CreateProblemDetails(context, StatusCodes.Status500InternalServerError,
+                                ex.Message, null, ex.Demystify().StackTrace, context.Request.HttpContext.Request.Path);
+
+            context.Response.ContentType = "application/problem+json";
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            await JsonSerializer.SerializeAsync(context.Response.Body, problemDetails, null, lifetime.ApplicationStopping);
         }
     }
 }

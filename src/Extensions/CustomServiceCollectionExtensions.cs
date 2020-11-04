@@ -262,7 +262,7 @@ namespace YA.ServiceTemplate.Extensions
         /// <summary>
         /// Добавляет шину данных МассТранзит.
         /// </summary>
-        public static IServiceCollection AddMessageBus(this IServiceCollection services, AppSecrets secrets)
+        public static IServiceCollection AddCustomMessageBus(this IServiceCollection services, AppSecrets secrets)
         {
             services.AddSingleton<IMessageAuditStore, MessageAuditStore>();
 

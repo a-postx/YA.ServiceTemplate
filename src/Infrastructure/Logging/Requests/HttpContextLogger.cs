@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -100,6 +100,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                             .ForContext(Logs.RequestPath, context.Request.Path)
                             .ForContext(Logs.RequestQuery, context.Request.QueryString)
                             .ForContext(Logs.RequestPathAndQuery, GetFullPath(context))
+                            .ForContext(Logs.RequestAborted, context.RequestAborted.IsCancellationRequested)
                             .Information("{RequestMethod} {RequestPath} - {StatusCode} in {ElapsedMilliseconds} ms", context.Request.Method, context.Request.Path, context.Response.StatusCode, elapsedMs);
 
                         await responseBodyMemoryStream.CopyToAsync(originalResponseBodyReference, lifetime.ApplicationStopping);
