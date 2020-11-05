@@ -34,16 +34,16 @@
     <PackageReference Include="Delobytes.AspNetCore.Swagger" Version="3.0.0" />
     <PackageReference Include="Delobytes.Mapper" Version="1.1.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.2.0" />
-    <PackageReference Include="MassTransit.AspNetCore" Version="7.0.4" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.4" />
-    <PackageReference Include="MassTransit.Prometheus" Version="7.0.4" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.4" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.0.6" />
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.0.6" />
+    <PackageReference Include="MassTransit.Prometheus" Version="7.0.6" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.6" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServicesIntegration" Version="3.1.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="4.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="4.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -55,7 +55,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Serilog.Enrichers.MassTransitMessage" Version="1.0.2" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageReference Include="Serilog.Exceptions" Version="5.6.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="5.7.0" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Logzio" Version="1.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
