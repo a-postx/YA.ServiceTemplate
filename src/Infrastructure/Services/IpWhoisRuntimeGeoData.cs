@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -57,7 +57,7 @@ namespace YA.ServiceTemplate.Infrastructure.Services
                 HttpResponseMessage response = await client.GetAsync(new Uri("json/?lang=ru&objects=country_code", UriKind.Relative), cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+                using (Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
                 {
                     IpWhoisGeoData data = await JsonSerializer
                         .DeserializeAsync<IpWhoisGeoData>(responseStream, null, cancellationToken);

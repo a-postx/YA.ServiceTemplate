@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.IO;
-using YA.ServiceTemplate.Constants;
 
 namespace YA.ServiceTemplate
 {
@@ -18,8 +17,9 @@ namespace YA.ServiceTemplate
 
             if (!File.Exists(filePath))
             {
-                File.WriteAllText(filePath, Id);
-                return Guid.NewGuid().ToString("N");
+                string id = Guid.NewGuid().ToString("N");
+                File.WriteAllText(filePath, id);
+                return id;
             }
             else
             {

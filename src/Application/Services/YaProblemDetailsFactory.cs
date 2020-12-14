@@ -12,7 +12,7 @@ using YA.ServiceTemplate.Application.Interfaces;
 namespace YA.ServiceTemplate.Application.Services
 {
     /// <summary>
-	/// Обработчик стандартного вывода деталей проблемы HTTP-запроса
+	/// Фабрика стандартного вывода деталей проблемы HTTP-запроса
 	/// </summary>
 	public class YaProblemDetailsFactory : ProblemDetailsFactory, IProblemDetailsFactory
     {

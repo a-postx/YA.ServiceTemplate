@@ -24,6 +24,7 @@ using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Options;
 
+[assembly: CLSCompliant(false)]
 namespace YA.ServiceTemplate
 {
     internal enum OsPlatforms
@@ -231,7 +232,7 @@ namespace YA.ServiceTemplate
                 .Enrich.WithProperty("AppName", AppName)
                 .Enrich.WithProperty("Version", AppVersion.ToString())
                 .Enrich.WithProperty("NodeId", Node.Id)
-                .Enrich.WithProperty("ProcessId", Process.GetCurrentProcess().Id)
+                .Enrich.WithProperty("ProcessId", Environment.ProcessId)
                 .Enrich.WithProperty("ProcessName", Process.GetCurrentProcess().ProcessName)
                 .Enrich.WithProperty("MachineName", Environment.MachineName)
                 .Enrich.WithProperty("EnvironmentName", hostEnv.EnvironmentName)

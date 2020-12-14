@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace YA.ServiceTemplate.Application.Models.ViewModels
@@ -82,6 +82,9 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
             return string.Join(", ", values);
         }
 
-        private string GetLinkValueItem(string rel, Uri url) => FormattableString.Invariant($"<{url}>; rel=\"{rel}\"");
+        private static string GetLinkValueItem(string rel, Uri url)
+        {
+            return FormattableString.Invariant($"<{url}>; rel=\"{rel}\"");
+        }
     }
 }

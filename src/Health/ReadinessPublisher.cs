@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace YA.ServiceTemplate.Health
 {
     /// <summary>
-    /// Regular check (30 sec) for availability of the required internal services.
+    /// Публикатор для регулярной засылки проверок здоровья в пуш-системы.
     /// </summary>
     public class ReadinessPublisher : IHealthCheckPublisher
     {
@@ -19,19 +18,9 @@ namespace YA.ServiceTemplate.Health
 
         private readonly ILogger<ReadinessPublisher> _log;
 
-        public List<(HealthReport report, CancellationToken cancellationToken)> Entries { get; } = new List<(HealthReport report, CancellationToken cancellationToken)>();
-        public Exception Exception { get; set; }
-
         public Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            Entries.Add((report, cancellationToken));
-
-            _log.LogInformation("{TIMESTAMP} Readiness Probe Status: {RESULT}", DateTime.UtcNow, report.Status);
-
-            if (Exception != null)
-            {
-                throw Exception;
-            }
+            _log.LogInformation("{Timestamp} Readiness Probe Status: {Result} ({CheckDuration}).", DateTime.UtcNow, report.Status, report.TotalDuration);
 
             cancellationToken.ThrowIfCancellationRequested();
 

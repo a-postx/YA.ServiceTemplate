@@ -9,7 +9,7 @@ namespace YA.ServiceTemplate.Application.Models.ViewModels
     /// <typeparam name="T">Тип выводимого элемента.</typeparam>
     public class PaginatedResultVm<T> : ValueObject where T : class
     {
-        public PaginatedResultVm(int totalCount, PageInfoVm pageInfo, List<T> items)
+        public PaginatedResultVm(int totalCount, PageInfoVm pageInfo, ICollection<T> items)
         {
             TotalCount = totalCount;
             PageInfo = pageInfo ?? throw new ArgumentNullException(nameof(pageInfo));

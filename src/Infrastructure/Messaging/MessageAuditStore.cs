@@ -45,7 +45,7 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging
                 (Logs.MessageBusConversationId, metadata.ConversationId),
                 (Logs.MessageBusMessage, savedMessage)))
             {
-                _log.LogInformation("{MessageBusContextType} message bus message {MessageBusMessageId}", metadata.ContextType, metadata.MessageId);
+                _log.LogInformation("Message bus message has been stored.");
             }
 
             return Task.CompletedTask;
