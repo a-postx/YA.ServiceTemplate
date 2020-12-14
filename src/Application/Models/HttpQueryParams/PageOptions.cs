@@ -1,4 +1,4 @@
-namespace YA.ServiceTemplate.Application.Models.Dto
+namespace YA.ServiceTemplate.Application.Models.HttpQueryParams
 {
     /// <summary>
     /// Page options for listing objects

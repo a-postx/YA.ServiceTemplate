@@ -1,13 +1,12 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
-using YA.ServiceTemplate.Application.Models.Dto;
 using YA.ServiceTemplate.Core;
 using YA.ServiceTemplate.Core.Entities;
 using YA.ServiceTemplate.Options;
@@ -16,14 +15,16 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 {
     public class GetCarPageCommand : IRequest<ICommandResult<PaginatedResult<Car>>>
     {
-        public GetCarPageCommand(PageOptions pageOptions, DateTimeOffset? createdAfter, DateTimeOffset? createdBefore)
+        public GetCarPageCommand(int? first, int? last, DateTimeOffset? createdAfter, DateTimeOffset? createdBefore)
         {
-            Options = pageOptions;
+            First = first;
+            Last = last;
             CreatedAfter = createdAfter;
             CreatedBefore = createdBefore;
         }
 
-        public PageOptions Options { get; protected set; }
+        public int? First { get; protected set; }
+        public int? Last { get; protected set; }
         public DateTimeOffset? CreatedAfter { get; protected set; }
         public DateTimeOffset? CreatedBefore { get; protected set; }
 
@@ -44,18 +45,16 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 
             public async Task<ICommandResult<PaginatedResult<Car>>> Handle(GetCarPageCommand command, CancellationToken cancellationToken)
             {
-                PageOptions pageOptions = command.Options;
+                int? first = command.First;
+                int? last = command.Last;
+                DateTimeOffset? createdAfter = command.CreatedAfter;
+                DateTimeOffset? createdBefore = command.CreatedBefore;
 
-                if (pageOptions == null)
-                {
-                    return new CommandResult<PaginatedResult<Car>>(CommandStatuses.BadRequest, null);
-                }
+                first = !first.HasValue && !last.HasValue ? _generalOptions.DefaultPaginationPageSize : first;
 
-                pageOptions.First = !pageOptions.First.HasValue && !pageOptions.Last.HasValue ? _generalOptions.DefaultPaginationPageSize : pageOptions.First;
-
-                Task<List<Car>> getCarsTask = GetCarsAsync(pageOptions.First, pageOptions.Last, command.CreatedAfter, command.CreatedBefore, cancellationToken);
-                Task<bool> getHasNextPageTask = GetHasNextPageAsync(pageOptions.First, command.CreatedAfter, command.CreatedBefore, cancellationToken);
-                Task<bool> getHasPreviousPageTask = GetHasPreviousPageAsync(pageOptions.Last, command.CreatedAfter, command.CreatedBefore, cancellationToken);
+                Task<List<Car>> getCarsTask = GetCarsAsync(first, last, createdAfter, createdBefore, cancellationToken);
+                Task<bool> getHasNextPageTask = GetHasNextPageAsync(first, createdAfter, createdBefore, cancellationToken);
+                Task<bool> getHasPreviousPageTask = GetHasPreviousPageAsync(last, createdAfter, createdBefore, cancellationToken);
                 Task<int> totalCountTask = _carRepository.GetTotalCountAsync(cancellationToken);
 
                 await Task.WhenAll(getCarsTask, getHasNextPageTask, getHasPreviousPageTask, totalCountTask).ConfigureAwait(false);

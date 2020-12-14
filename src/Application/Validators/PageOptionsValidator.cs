@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using YA.ServiceTemplate.Application.Models.Dto;
+using FluentValidation;
+using YA.ServiceTemplate.Application.Models.HttpQueryParams;
 
 namespace YA.ServiceTemplate.Application.Validators
 {

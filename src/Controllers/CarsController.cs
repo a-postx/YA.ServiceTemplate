@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
 using YA.ServiceTemplate.Application.ActionHandlers.Cars;
-using YA.ServiceTemplate.Application.Models.Dto;
+using YA.ServiceTemplate.Application.Models.HttpQueryParams;
 
 namespace YA.ServiceTemplate.Controllers
 {

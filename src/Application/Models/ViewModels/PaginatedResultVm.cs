@@ -1,83 +1,35 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
-using YA.ServiceTemplate.Application.Models.Dto;
 
 namespace YA.ServiceTemplate.Application.Models.ViewModels
 {
+    /// <summary>
+    /// Постраничный результат вывода элементов общего типа.
+    /// </summary>
+    /// <typeparam name="T">Тип выводимого элемента.</typeparam>
     public class PaginatedResultVm<T> : ValueObject where T : class
     {
-        public PaginatedResultVm(LinkGenerator linkGenerator, PageOptions pageOptions, bool hasNextPage, bool hasPreviousPage,
-            int totalCount, string startCursor, string endCursor, HttpContext context, string routeName, List<T> items)
+        public PaginatedResultVm(int totalCount, PageInfoVm pageInfo, List<T> items)
         {
-            if (linkGenerator == null)
-            {
-                throw new ArgumentNullException(nameof(linkGenerator));
-            }
-
-            if (pageOptions == null)
-            {
-                throw new ArgumentNullException(nameof(pageOptions));
-            }
-
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (routeName == null)
-            {
-                throw new ArgumentNullException(nameof(routeName));
-            }
-
-            Items = items ?? new List<T>();
-            PageInfo = new PageInfoVm()
-            {
-                Count = items.Count,
-                HasNextPage = hasNextPage,
-                HasPreviousPage = hasPreviousPage,
-                NextPageUrl = hasNextPage ? new Uri(linkGenerator.GetUriByRouteValues(
-                                context,
-                                routeName,
-                                new PageOptions()
-                                {
-                                    First = pageOptions.First,
-                                    Last = pageOptions.Last,
-                                    After = endCursor,
-                                })) : null,
-                PreviousPageUrl = hasPreviousPage ? new Uri(linkGenerator.GetUriByRouteValues(
-                                context,
-                                routeName,
-                                new PageOptions()
-                                {
-                                    First = pageOptions.First,
-                                    Last = pageOptions.Last,
-                                    Before = startCursor
-                                })) : null,
-                FirstPageUrl = new Uri(linkGenerator.GetUriByRouteValues(
-                                context,
-                                routeName,
-                                new PageOptions()
-                                {
-                                    First = pageOptions.First ?? pageOptions.Last,
-                                })),
-                LastPageUrl = new Uri(linkGenerator.GetUriByRouteValues(
-                                context,
-                                routeName,
-                                new PageOptions()
-                                {
-                                    Last = pageOptions.First ?? pageOptions.Last,
-                                })),
-            };
             TotalCount = totalCount;
+            PageInfo = pageInfo ?? throw new ArgumentNullException(nameof(pageInfo));
+            Items = items ?? throw new ArgumentNullException(nameof(items));
         }
 
+        /// <summary>
+        /// Общее количество элементов.
+        /// </summary>
         public int TotalCount { get; private set; }
 
+        /// <summary>
+        /// Модель страницы.
+        /// </summary>
         public PageInfoVm PageInfo { get; private set; }
 
-        public List<T> Items { get; private set; }
+        /// <summary>
+        /// Список элементов.
+        /// </summary>
+        public ICollection<T> Items { get; private set; }
 
         protected override IEnumerable<object> GetAtomicValues()
         {

@@ -14,7 +14,7 @@ using MassTransit.Audit;
 using MassTransit.PrometheusIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Caching.Distributed;
@@ -26,7 +26,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Health;
 using YA.ServiceTemplate.Health.Services;
@@ -34,7 +33,6 @@ using YA.ServiceTemplate.Health.System;
 using YA.ServiceTemplate.Infrastructure.Messaging;
 using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
-using YA.ServiceTemplate.Infrastructure.Services;
 using YA.ServiceTemplate.OperationFilters;
 using YA.ServiceTemplate.Options;
 using YA.ServiceTemplate.Options.Validators;
@@ -213,6 +211,7 @@ namespace YA.ServiceTemplate.Extensions
                 {
                     options.AssumeDefaultVersionWhenUnspecified = true;
                     options.ReportApiVersions = true;
+                    options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
                 })
                 .AddVersionedApiExplorer(x => x.GroupNameFormat = "'v'VVV"); // Version format: 'v'major[.minor][-status];
         }
@@ -316,18 +315,6 @@ namespace YA.ServiceTemplate.Extensions
             services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
             services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
             services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-
-            return services;
-        }
-
-        /// <summary>
-        /// Добавляет кастомизированную фабрику Деталей Проблемы.
-        /// </summary>
-        public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
-        {
-            services
-                .AddTransient<IProblemDetailsFactory, YaProblemDetailsFactory>()
-                .AddTransient<ProblemDetailsFactory, YaProblemDetailsFactory>();
 
             return services;
         }

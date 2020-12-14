@@ -1,9 +1,8 @@
-﻿using Delobytes.AspNetCore;
+using Delobytes.AspNetCore;
 using Delobytes.Mapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Core;
 using YA.ServiceTemplate.Core.Entities;
-using YA.ServiceTemplate.Application.Models.Dto;
+using YA.ServiceTemplate.Application.Models.HttpQueryParams;
 
 namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
 {
@@ -26,20 +25,20 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
             IActionContextAccessor actionCtx,
             IMediator mediator,
             IMapper<Car, CarVm> carMapper,
-            LinkGenerator linkGenerator)
+            IPaginatedResultFactory paginatedResultFactory)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _actionCtx = actionCtx ?? throw new ArgumentNullException(nameof(actionCtx));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _carMapper = carMapper ?? throw new ArgumentNullException(nameof(carMapper));
-            _linkGenerator = linkGenerator ?? throw new ArgumentNullException(nameof(linkGenerator));
+            _paginatedResultFactory = paginatedResultFactory ?? throw new ArgumentNullException(nameof(paginatedResultFactory));
         }
 
         private readonly ILogger<GetCarPageAh> _log;
         private readonly IActionContextAccessor _actionCtx;
         private readonly IMediator _mediator;
         private readonly IMapper<Car, CarVm> _carMapper;
-        private readonly LinkGenerator _linkGenerator;
+        private readonly IPaginatedResultFactory _paginatedResultFactory;
 
         public async Task<IActionResult> ExecuteAsync(PageOptions pageOptions, CancellationToken cancellationToken)
         {
@@ -47,15 +46,13 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
             DateTimeOffset? createdBefore = Cursor.FromCursor<DateTimeOffset?>(pageOptions.After);
 
             ICommandResult<PaginatedResult<Car>> result = await _mediator
-                .Send(new GetCarPageCommand(pageOptions, createdAfter, createdBefore), cancellationToken);
+                .Send(new GetCarPageCommand(pageOptions.First, pageOptions.Last, createdAfter, createdBefore), cancellationToken);
 
             switch (result.Status)
             {
                 case CommandStatuses.Unknown:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(result.Status), result.Status, null);
-                case CommandStatuses.BadRequest:
-                    return new BadRequestResult();
                 case CommandStatuses.NotFound:
                     return new NotFoundResult();
                 case CommandStatuses.Ok:
@@ -64,17 +61,9 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
                     List<CarVm> carViewModels = _carMapper.MapList(paginatedResult.Items);
                     (string startCursor, string endCursor) = Cursor.GetFirstAndLastCursor(paginatedResult.Items, x => x.Created);
 
-                    PaginatedResultVm<CarVm> paginatedResultVm = new PaginatedResultVm<CarVm>(
-                        _linkGenerator,
-                        pageOptions,
-                        paginatedResult.HasNextPage,
-                        paginatedResult.HasPreviousPage,
-                        paginatedResult.TotalCount,
-                        startCursor,
-                        endCursor,
-                        _actionCtx.ActionContext.HttpContext,
-                        RouteNames.GetCarPage,
-                        carViewModels);
+                    PaginatedResultVm<CarVm> paginatedResultVm = _paginatedResultFactory
+                        .GetPaginatedResult(pageOptions, paginatedResult.HasNextPage, paginatedResult.HasPreviousPage,
+                        paginatedResult.TotalCount, startCursor, endCursor, RouteNames.GetCarPage, carViewModels);
 
                     _actionCtx.ActionContext.HttpContext
                         .Response.Headers.Add(CustomHeaderNames.Link, paginatedResultVm.PageInfo.ToLinkHttpHeaderValue());

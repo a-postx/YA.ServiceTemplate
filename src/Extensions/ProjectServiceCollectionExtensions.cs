@@ -1,10 +1,12 @@
 using Delobytes.Mapper;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using YA.ServiceTemplate.Application.ActionHandlers.Cars;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Mappers;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Models.ViewModels;
+using YA.ServiceTemplate.Application.Services;
 using YA.ServiceTemplate.Core.Entities;
 using YA.ServiceTemplate.Infrastructure.Data;
 using YA.ServiceTemplate.Infrastructure.Services;
@@ -62,7 +64,20 @@ namespace YA.ServiceTemplate.Extensions
             return services
                 .AddSingleton<IClockService, ClockService>()
                 .AddSingleton<IRuntimeGeoDataService, IpWhoisRuntimeGeoData>()
-                .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>();
+                .AddScoped<IRuntimeContextAccessor, RuntimeContextAccessor>()
+                .AddScoped<IPaginatedResultFactory, PaginatedResultFactory>();
+        }
+
+        /// <summary>
+        /// Добавляет кастомизированную фабрику Деталей Проблемы.
+        /// </summary>
+        public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
+        {
+            services
+                .AddTransient<IProblemDetailsFactory, YaProblemDetailsFactory>()
+                .AddTransient<ProblemDetailsFactory, YaProblemDetailsFactory>();
+
+            return services;
         }
     }
 }
