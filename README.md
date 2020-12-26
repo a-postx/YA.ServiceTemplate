@@ -11,7 +11,7 @@
 
 ## Компоненты
 
-- Платформа: .Net Core 3
+- Платформа: .Net 5
 - Взаимодействие: очереди сообщений (MassTransit + RabbitMQ)
 - Логирование и трассировка: Serilog, ELK, ApplicationInsights
 - Секреты: AWS Parameter Store
@@ -92,7 +92,7 @@
 Откройте https://www.cloudamqp.com/ и зарегистрируйтесь на бесплатном тарифе чтобы получить строку подключения вида amqp://{login}:{password}@{host}/{vhost}
 
 #### Логирование LogzIO
-Если вы хотите использовать Логстеш и Кибану для управления логами, то можете воспользоваться логированием от Logz.IO. Откройте https://logz.io и зарегистрируйтесь на бесплатном тарифе чтобы получить токен доступа
+Если вы хотите использовать Логстеш и Кибану для управления логами, то можете воспользоваться логированием от Logz.IO. Откройте https://logz.io и зарегистрируйтесь на бесплатном тарифе (выберите один из европейских датацентров), чтобы получить токен доступа
 
 #### Телеметрия Application Insights
 Если вы хотите развернуть приложение на платформе Miscrosoft Azure, то можете дополнительно воспользоваться телеметрией Application Insights. Откройте https://portal.azure.com, перейдите в раздел Application Insights и добавьте новый ресурс чтобы получить ключ инструментирования
@@ -211,7 +211,7 @@ Optional:
 Register on https://www.cloudamqp.com/ and create instance with a free plan to get a connection string (amqp://{login}:{password}@{host}/{vhost})
 
 #### LogzIO logging
-If you would like to use Logstash and Kibana for log management then you can register on https://logz.io to get a free access token
+If you would like to use Logstash and Kibana for log management then you can register on https://logz.io (choose one of the EU datacenters) to get a free access token
 
 #### Application Insights telemetry
 If you would like to deploy application on Miscrosoft Azure then you may benefit from Application Insights telemetry. Go to https://portal.azure.com, open up Application Insights and add new resource to get instrumentation key
