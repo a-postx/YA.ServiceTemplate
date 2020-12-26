@@ -32,7 +32,7 @@ namespace YA.ServiceTemplate.Application.Features.SomeAggregate.Commands
 
                 _log.LogInformation($"Thing {command.ThingToDo} done");
 
-                return new CommandResult<string>(CommandStatuses.Ok, "world!");
+                return new CommandResult<string>(CommandStatus.Ok, "world!");
             }
         }
     }

@@ -38,10 +38,10 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 
                 if (car == null)
                 {
-                    return new CommandResult<Car>(CommandStatuses.NotFound, null);
+                    return new CommandResult<Car>(CommandStatus.NotFound, null);
                 }
 
-                return new CommandResult<Car>(CommandStatuses.Ok, car);
+                return new CommandResult<Car>(CommandStatus.Ok, car);
             }
         }
     }

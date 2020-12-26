@@ -51,7 +51,7 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 
                 if (car == null)
                 {
-                    return new CommandResult<Car>(CommandStatuses.NotFound, null);
+                    return new CommandResult<Car>(CommandStatus.NotFound, null);
                 }
 
                 CarSm carSm = _carToCarSmMapper.Map(car);
@@ -63,14 +63,14 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 
                 if (!validationResult.IsValid)
                 {
-                    return new CommandResult<Car>(CommandStatuses.ModelInvalid, null, validationResult);
+                    return new CommandResult<Car>(CommandStatus.ModelInvalid, null, validationResult);
                 }
 
                 _carSmToCarMapper.Map(carSm, car);
 
                 await _carRepository.UpdateAsync(car, cancellationToken);
 
-                return new CommandResult<Car>(CommandStatuses.Ok, car);
+                return new CommandResult<Car>(CommandStatus.Ok, car);
             }
         }
     }

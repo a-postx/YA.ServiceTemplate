@@ -37,12 +37,12 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 
                 if (car == null)
                 {
-                    return new CommandResult<Empty>(CommandStatuses.NotFound, null);
+                    return new CommandResult<Empty>(CommandStatus.NotFound, null);
                 }
 
                 await _carRepository.DeleteAsync(car, cancellationToken);
                 
-                return new CommandResult<Empty>(CommandStatuses.Ok, null);
+                return new CommandResult<Empty>(CommandStatus.Ok, null);
             }
         }
     }

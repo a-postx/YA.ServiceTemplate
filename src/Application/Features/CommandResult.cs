@@ -9,14 +9,14 @@ namespace YA.ServiceTemplate.Application.Features
     {
         private CommandResult() { }
 
-        public CommandResult(CommandStatuses status, TResult data, ValidationResult validationResult = null)
+        public CommandResult(CommandStatus status, TResult data, ValidationResult validationResult = null)
         {
             Status = status;
             Data = data;
             ValidationResult = validationResult;
         }
 
-        public CommandStatuses Status { get; protected set; }
+        public CommandStatus Status { get; protected set; }
         public TResult Data { get; protected set; }
         public ValidationResult ValidationResult { get; protected set; }
     }

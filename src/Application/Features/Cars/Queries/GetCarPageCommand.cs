@@ -66,7 +66,7 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
 
                 if (cars == null)
                 {
-                    return new CommandResult<PaginatedResult<Car>>(CommandStatuses.NotFound, null);
+                    return new CommandResult<PaginatedResult<Car>>(CommandStatus.NotFound, null);
                 }
 
                 PaginatedResult<Car> result = new PaginatedResult<Car>(
@@ -76,7 +76,7 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Queries
                     cars
                 );
 
-                return new CommandResult<PaginatedResult<Car>>(CommandStatuses.Ok, result);
+                return new CommandResult<PaginatedResult<Car>>(CommandStatus.Ok, result);
             }
 
             private Task<List<Car>> GetCarsAsync(

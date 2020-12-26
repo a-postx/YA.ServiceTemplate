@@ -50,12 +50,12 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
 
             switch (result.Status)
             {
-                case CommandStatuses.Unknown:
+                case CommandStatus.Unknown:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(result.Status), result.Status, null);
-                case CommandStatuses.NotFound:
+                case CommandStatus.NotFound:
                     return new NotFoundResult();
-                case CommandStatuses.Ok:
+                case CommandStatus.Ok:
                     PaginatedResult<Car> paginatedResult = result.Data;
 
                     List<CarVm> carViewModels = _carMapper.MapList(paginatedResult.Items);

@@ -42,7 +42,7 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Commands
                 Car car = _carSmToCarMapper.Map(carSm);
                 car = await _carRepository.AddAsync(car, cancellationToken);
 
-                return new CommandResult<Car>(CommandStatuses.Ok, car);
+                return new CommandResult<Car>(CommandStatus.Ok, car);
             }
         }
     }

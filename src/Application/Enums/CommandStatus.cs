@@ -1,12 +1,12 @@
-﻿namespace YA.ServiceTemplate.Application.Enums
+namespace YA.ServiceTemplate.Application.Enums
 {
-    public enum CommandStatuses
+    public enum CommandStatus
     {
         Unknown = 0,
         Ok = 1,
         NotFound = 2,
-        ArgumentInvalid = 4,
-        BadRequest = 8,
-        ModelInvalid = 16
+        ArgumentInvalid = 3,
+        BadRequest = 4,
+        ModelInvalid = 5,
     }
 }

@@ -114,9 +114,6 @@ dotnet_diagnostic.CA1034.severity = suggestion
 # VSTHRD200: Use "Async" suffix for async methods
 dotnet_diagnostic.VSTHRD200.severity = suggestion
 
-# CA1034: Nested types should not be visible
-dotnet_diagnostic.IDE1006.severity = silent
-
 ##########################################
 # .NET Language Conventions
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions

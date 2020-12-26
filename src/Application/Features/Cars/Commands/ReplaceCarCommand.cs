@@ -46,14 +46,14 @@ namespace YA.ServiceTemplate.Application.Features.Cars.Commands
 
                 if (car == null)
                 {
-                    return new CommandResult<Car>(CommandStatuses.NotFound, null);
+                    return new CommandResult<Car>(CommandStatus.NotFound, null);
                 }
 
                 _carSmToCarMapper.Map(carSm, car);
 
                 car = await _carRepository.UpdateAsync(car, cancellationToken);
 
-                return new CommandResult<Car>(CommandStatuses.Ok, car);
+                return new CommandResult<Car>(CommandStatus.Ok, car);
             }
         }
     }

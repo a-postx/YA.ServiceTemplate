@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Alexey Yakubin</Authors>
     <Company>Delobytes</Company>
     <Product>YA.ServiceTemplate</Product>
@@ -19,6 +19,10 @@
     <Copyright></Copyright>
     <PackageId>Delobytes.YA.ServiceTemplate</PackageId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
@@ -65,11 +69,6 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-  </PropertyGroup>
-
 
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />

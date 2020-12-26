@@ -43,10 +43,10 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
 
             switch (result.Status)
             {
-                case CommandStatuses.Unknown:
+                case CommandStatus.Unknown:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(result.Status), result.Status, null);
-                case CommandStatuses.Ok:
+                case CommandStatus.Ok:
                     CarVm carVm = _carVmMapper.Map(result.Data);
 
                     _actionCtx.ActionContext.HttpContext

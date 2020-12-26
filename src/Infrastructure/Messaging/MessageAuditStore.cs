@@ -36,7 +36,7 @@ namespace YA.ServiceTemplate.Infrastructure.Messaging
             }
 
             //корреляционный идентификатор перезаписывается, если уже существует
-            using (_log.BeginScopeWith((Logs.LogType, LogTypes.MessageBusMessage.ToString()),
+            using (_log.BeginScopeWith((Logs.LogType, LogType.MessageBusMessage.ToString()),
                 (Logs.MessageBusContextType, metadata.ContextType),
                 (Logs.MessageBusSourceAddress, metadata.SourceAddress),
                 (Logs.MessageBusDestinationAddress, metadata.DestinationAddress),
