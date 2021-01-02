@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
-    <Version>1.0.2</Version>
+    <Version>1.1.0</Version>
     <Authors>Alexey Yakubin</Authors>
     <Company>Delobytes</Company>
     <Product>YA.ServiceTemplate</Product>
@@ -31,7 +31,7 @@
 
   <ItemGroup Label="Package References">
     <PackageReference Include="Amazon.Extensions.Configuration.SystemsManager" Version="2.0.0" />
-    <PackageReference Include="AspNetCore.HealthChecks.Prometheus.Metrics" Version="5.0.0-preview1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Prometheus.Metrics" Version="5.0.0" />
     <PackageReference Include="Ben.Demystifier" Version="0.1.6" />
     <PackageReference Include="CorrelationId" Version="3.0.0" />
     <PackageReference Include="Delobytes.AspNetCore" Version="3.0.0" />

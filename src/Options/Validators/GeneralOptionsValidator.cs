@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 
 namespace YA.ServiceTemplate.Options.Validators
@@ -22,6 +22,11 @@ namespace YA.ServiceTemplate.Options.Validators
             if (options.DefaultPaginationPageSize <= 0)
             {
                 failures.Add($"{nameof(options.DefaultPaginationPageSize)} option is not found.");
+            }
+
+            if (!options.IdempotencyFilterEnabled.HasValue)
+            {
+                failures.Add($"{nameof(options.IdempotencyFilterEnabled)} option is not found.");
             }
 
             if (failures.Count > 0)

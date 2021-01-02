@@ -28,12 +28,12 @@ using YA.ServiceTemplate.Options;
 [assembly: CLSCompliant(false)]
 namespace YA.ServiceTemplate
 {
-    internal enum OsPlatforms
+    internal enum OsPlatform
     {
         Unknown = 0,
         Windows = 1,
         Linux = 2,
-        OSX = 4
+        OSX = 3
     }
 
     public static class Program
@@ -43,7 +43,7 @@ namespace YA.ServiceTemplate
         internal static readonly string RootPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
         internal static Countries Country { get; private set; }
-        internal static OsPlatforms OsPlatform { get; private set; }
+        internal static OsPlatform OsPlatform { get; private set; }
 
         public static async Task<int> Main(string[] args)
         {
@@ -306,23 +306,23 @@ namespace YA.ServiceTemplate
             limits.RequestHeadersTimeout = sourceLimits.RequestHeadersTimeout;
         }
 
-        private static OsPlatforms GetOs()
+        private static OsPlatform GetOs()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return OsPlatforms.Windows;
+                return OsPlatform.Windows;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return OsPlatforms.Linux;
+                return OsPlatform.Linux;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return OsPlatforms.OSX;
+                return OsPlatform.OSX;
             }
             else
             {
-                return OsPlatforms.Unknown;
+                return OsPlatform.Unknown;
             }
         }
     }

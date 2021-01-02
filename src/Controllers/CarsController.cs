@@ -8,7 +8,7 @@ using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using Swashbuckle.AspNetCore.Annotations;
 using YA.ServiceTemplate.Application.Models.SaveModels;
-using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
+using YA.ServiceTemplate.Application.Middlewares.ResourceFilters;
 using YA.ServiceTemplate.Application.ActionHandlers.Cars;
 using YA.ServiceTemplate.Application.Models.HttpQueryParams;
 
@@ -20,7 +20,7 @@ namespace YA.ServiceTemplate.Controllers
     [Route("[controller]")]
     [ApiController]
     [ApiVersion(ApiVersionName.V1)]
-    [ServiceFilter(typeof(ApiRequestFilter))]
+    [ServiceFilter(typeof(IdempotencyFilterAttribute))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, SwaggerResponseDescriptions.Code500, typeof(ProblemDetails))]
     public class CarsController : ControllerBase
     {

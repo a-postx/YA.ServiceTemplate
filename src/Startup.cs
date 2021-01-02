@@ -14,9 +14,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using YA.ServiceTemplate.Application;
 using YA.ServiceTemplate.Application.Interfaces;
-using YA.ServiceTemplate.Application.Middlewares.ActionFilters;
+using YA.ServiceTemplate.Application.Middlewares.ResourceFilters;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Extensions;
 using YA.ServiceTemplate.Health;
@@ -112,8 +111,7 @@ namespace YA.ServiceTemplate
 
             services.AddCustomMessageBus(secrets);
 
-            services.AddScoped<ApiRequestFilter>();
-            services.AddScoped<IApiRequestTracker, ApiRequestTracker>();
+            services.AddScoped<IdempotencyFilterAttribute>();
             services.AddSingleton<IApiRequestMemoryCache, ApiRequestMemoryCache>();
         }
 
