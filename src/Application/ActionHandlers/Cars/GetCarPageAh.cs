@@ -40,7 +40,7 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
         private readonly IMapper<Car, CarVm> _carMapper;
         private readonly IPaginatedResultFactory _paginatedResultFactory;
 
-        public async Task<IActionResult> ExecuteAsync(PageOptions pageOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> ExecuteAsync(PageOptionsCursor pageOptions, CancellationToken cancellationToken)
         {
             DateTimeOffset? createdAfter = Cursor.FromCursor<DateTimeOffset?>(pageOptions.Before);
             DateTimeOffset? createdBefore = Cursor.FromCursor<DateTimeOffset?>(pageOptions.After);
@@ -62,7 +62,7 @@ namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
                     (string startCursor, string endCursor) = Cursor.GetFirstAndLastCursor(paginatedResult.Items, x => x.Created);
 
                     PaginatedResultVm<CarVm> paginatedResultVm = _paginatedResultFactory
-                        .GetPaginatedResult(pageOptions, paginatedResult.HasNextPage, paginatedResult.HasPreviousPage,
+                        .GetCursorPaginatedResult(pageOptions, paginatedResult.HasNextPage, paginatedResult.HasPreviousPage,
                         paginatedResult.TotalCount, startCursor, endCursor, RouteNames.GetCarPage, carViewModels);
 
                     _actionCtx.ActionContext.HttpContext

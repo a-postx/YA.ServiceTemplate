@@ -3,7 +3,7 @@ namespace YA.ServiceTemplate.Application.Models.HttpQueryParams
     /// <summary>
     /// Page options for listing objects
     /// </summary>
-    public class PageOptions
+    public class PageOptionsCursor
     {
         public int? First { get; set; }
 

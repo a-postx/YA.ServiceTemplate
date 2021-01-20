@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using YA.ServiceTemplate.Application.Interfaces;
 
 namespace YA.ServiceTemplate.Application.Middlewares
@@ -22,6 +23,7 @@ namespace YA.ServiceTemplate.Application.Middlewares
         private readonly RequestDelegate _next;
 
         public async Task InvokeAsync(HttpContext context,
+            ILogger<HttpExceptionHandler> logger,
             IProblemDetailsFactory detailsFactory,
             IHostApplicationLifetime lifetime)
         {
@@ -38,6 +40,7 @@ namespace YA.ServiceTemplate.Application.Middlewares
             }
             catch (Exception ex)
             {
+                logger.LogError(ex, "Unhandled exception.");
                 await WriteProblemDetails(context, detailsFactory, lifetime, ex);
             }
         }

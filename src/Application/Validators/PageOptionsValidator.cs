@@ -3,7 +3,7 @@ using YA.ServiceTemplate.Application.Models.HttpQueryParams;
 
 namespace YA.ServiceTemplate.Application.Validators
 {
-    public class PageOptionsValidator : AbstractValidator<PageOptions>
+    public class PageOptionsValidator : AbstractValidator<PageOptionsCursor>
     {
         public PageOptionsValidator()
         {

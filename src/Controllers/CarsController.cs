@@ -123,7 +123,7 @@ namespace YA.ServiceTemplate.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
         public Task<IActionResult> GetPageAsync(
             [FromServices] IGetCarPageAh handler,
-            [FromQuery] PageOptions pageOptions,
+            [FromQuery] PageOptionsCursor pageOptions,
             CancellationToken cancellationToken)
         {
             return handler.ExecuteAsync(pageOptions, cancellationToken);
