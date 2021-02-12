@@ -20,7 +20,6 @@ namespace YA.ServiceTemplate.Controllers
     [Route("[controller]")]
     [ApiController]
     [ApiVersion(ApiVersionName.V1)]
-    [ServiceFilter(typeof(IdempotencyFilterAttribute))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, SwaggerResponseDescriptions.Code500, typeof(ProblemDetails))]
     public class CarsController : ControllerBase
     {
@@ -139,6 +138,7 @@ namespace YA.ServiceTemplate.Controllers
         /// <returns>200 OK if the car was patched, 400 Bad Request if the patch was invalid or 404 Not Found
         /// if a car with the specified unique identifier was not found.</returns>
         [HttpPatch("{carId}", Name = RouteNames.PatchCar)]
+        [ServiceFilter(typeof(IdempotencyFilterAttribute))]
         [SwaggerResponse(StatusCodes.Status200OK, "Patched car with the specified unique identifier.", typeof(CarVm))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Patch document is invalid.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Car with the specified unique identifier could not be found.")]
@@ -163,6 +163,7 @@ namespace YA.ServiceTemplate.Controllers
         /// <returns>201 Created response containing newly created car or 400 Bad Request if the car is
         /// invalid.</returns>
         [HttpPost("", Name = RouteNames.PostCar)]
+        [ServiceFilter(typeof(IdempotencyFilterAttribute))]
         [SwaggerResponse(StatusCodes.Status201Created, "Car was created.", typeof(CarVm))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Request is invalid.", typeof(ProblemDetails))]
         [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]

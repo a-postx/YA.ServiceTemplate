@@ -48,12 +48,12 @@ namespace YA.ServiceTemplate.Extensions
         {
             services.AddDefaultCorrelationId(options =>
             {
-                options.CorrelationIdGenerator = () => "";
+                options.CorrelationIdGenerator = () => Guid.NewGuid().ToString();
                 options.AddToLoggingScope = true;
                 options.LoggingScopeKey = Logs.CorrelationId;
                 options.EnforceHeader = false;
-                options.IgnoreRequestHeader = false;
-                options.IncludeInResponse = false;
+                options.IgnoreRequestHeader = true;
+                options.IncludeInResponse = true;
                 options.RequestHeader = generalOptions.CorrelationIdHeader;
                 options.ResponseHeader = generalOptions.CorrelationIdHeader;
                 options.UpdateTraceIdentifier = false;
@@ -104,7 +104,8 @@ namespace YA.ServiceTemplate.Extensions
             services.AddSingleton<IValidateOptions<HostOptions>, HostOptionsValidator>();
             services.AddSingleton<IValidateOptions<AwsOptions>, AwsOptionsValidator>();
             services.AddSingleton<IValidateOptions<GeneralOptions>, GeneralOptionsValidator>();
-            
+            services.AddSingleton<IValidateOptions<IdempotencyControlOptions>, IdempotencyControlOptionsValidator>();
+
             services.AddSingleton<IValidateOptions<AppSecrets>, AppSecretsValidator>();
 
             services
@@ -116,7 +117,8 @@ namespace YA.ServiceTemplate.Extensions
                 .ConfigureAndValidateSingleton<CacheProfileOptions>(configuration.GetSection(nameof(ApplicationOptions.CacheProfiles)), o => o.BindNonPublicProperties = false)
                 .ConfigureAndValidateSingleton<KestrelServerOptions>(configuration.GetSection(nameof(ApplicationOptions.Kestrel)), o => o.BindNonPublicProperties = false)
                 .ConfigureAndValidateSingleton<GeneralOptions>(configuration.GetSection(nameof(ApplicationOptions.General)), o => o.BindNonPublicProperties = false)
-                
+                .ConfigureAndValidateSingleton<IdempotencyControlOptions>(configuration.GetSection(nameof(ApplicationOptions.IdempotencyControl)), o => o.BindNonPublicProperties = false)
+
                 .ConfigureAndValidateSingleton<AppSecrets>(configuration.GetSection(nameof(AppSecrets)), o => o.BindNonPublicProperties = false);
 
             return services;
@@ -134,7 +136,8 @@ namespace YA.ServiceTemplate.Extensions
                 AwsOptions awsOptions = services.BuildServiceProvider().GetService<IOptions<AwsOptions>>().Value;
                 ApplicationOptions applicationOptions = services.BuildServiceProvider().GetService<IOptions<ApplicationOptions>>().Value;
                 GeneralOptions generalOptions = services.BuildServiceProvider().GetService<IOptions<GeneralOptions>>().Value;
-                
+                IdempotencyControlOptions idempotencyOptions = services.BuildServiceProvider().GetService<IOptions<IdempotencyControlOptions>>().Value;
+
                 AppSecrets appSecrets = services.BuildServiceProvider().GetService<IOptions<AppSecrets>>().Value;
             }
             catch (OptionsValidationException ex)
@@ -219,7 +222,7 @@ namespace YA.ServiceTemplate.Extensions
         /// <summary>
         /// Add and configure Swagger services.
         /// </summary>
-        public static IServiceCollection AddCustomSwagger(this IServiceCollection services)
+        public static IServiceCollection AddCustomSwagger(this IServiceCollection services, IdempotencyControlOptions idempotencyOptions)
         {
             return services.AddSwaggerGen(options =>
                 {
@@ -235,7 +238,12 @@ namespace YA.ServiceTemplate.Extensions
                     options.IncludeXmlCommentsIfExists(assembly);
 
                     options.OperationFilter<ApiVersionOperationFilter>();
-                    options.OperationFilter<CorrelationIdOperationFilter>();
+
+                    if (idempotencyOptions.IdempotencyFilterEnabled.HasValue && idempotencyOptions.IdempotencyFilterEnabled.Value)
+                    {
+                        options.OperationFilter<ClientRequestIdOperationFilter>(idempotencyOptions.ClientRequestIdHeader);
+                    }
+
                     options.OperationFilter<ContentTypeOperationFilter>();
 
                     // Show an example model for JsonPatchDocument<T>.

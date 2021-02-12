@@ -24,11 +24,6 @@ namespace YA.ServiceTemplate.Options.Validators
                 failures.Add($"{nameof(options.DefaultPaginationPageSize)} option is not found.");
             }
 
-            if (!options.IdempotencyFilterEnabled.HasValue)
-            {
-                failures.Add($"{nameof(options.IdempotencyFilterEnabled)} option is not found.");
-            }
-
             if (failures.Count > 0)
             {
                 return ValidateOptionsResult.Fail(failures);

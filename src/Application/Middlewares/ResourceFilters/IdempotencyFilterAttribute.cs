@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using YA.ServiceTemplate.Application.Exceptions;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.Service;
 using YA.ServiceTemplate.Constants;
@@ -29,33 +31,33 @@ namespace YA.ServiceTemplate.Application.Middlewares.ResourceFilters
     {
         public IdempotencyFilterAttribute(ILogger<IdempotencyFilterAttribute> logger,
             IApiRequestMemoryCache cacheService,
-            IRuntimeContextAccessor runtimeContextAccessor,
-            IOptions<GeneralOptions> options,
+            IHttpContextAccessor httpContext,
+            IOptions<IdempotencyControlOptions> options,
             IProblemDetailsFactory problemDetailsFactory)
         {
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-            _runtimeCtx = runtimeContextAccessor ?? throw new ArgumentNullException(nameof(runtimeContextAccessor));
-            _generalOptions = options.Value;
+            _httpCtx = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
+            _idempotencyOptions = options.Value;
             _pdFactory = problemDetailsFactory ?? throw new ArgumentNullException(nameof(problemDetailsFactory));
         }
 
         private readonly ILogger<IdempotencyFilterAttribute> _log;
         private readonly IApiRequestMemoryCache _cacheService;
-        private readonly IRuntimeContextAccessor _runtimeCtx;
-        private readonly GeneralOptions _generalOptions;
+        private readonly IHttpContextAccessor _httpCtx;
+        private readonly IdempotencyControlOptions _idempotencyOptions;
         private readonly IProblemDetailsFactory _pdFactory;
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
         {
-            if (_generalOptions.IdempotencyFilterEnabled.HasValue && _generalOptions.IdempotencyFilterEnabled.Value)
+            if (_idempotencyOptions.IdempotencyFilterEnabled.HasValue && _idempotencyOptions.IdempotencyFilterEnabled.Value)
             {
-                Guid requestId = _runtimeCtx.GetCorrelationId();
+                Guid requestId = GetClientRequestId();
 
                 if (requestId == Guid.Empty)
                 {
                     ProblemDetails problemDetails = _pdFactory.CreateProblemDetails(context.HttpContext, StatusCodes.Status400BadRequest,
-                                $"Запрос не содержит заголовка {_generalOptions.CorrelationIdHeader} или значение в нём неверно.",
+                                $"Запрос не содержит заголовка {_idempotencyOptions.ClientRequestIdHeader} или значение в нём неверно.",
                                 null, null, context.HttpContext.Request.Path);
 
                     context.Result = new BadRequestObjectResult(problemDetails);
@@ -185,6 +187,31 @@ namespace YA.ServiceTemplate.Application.Middlewares.ResourceFilters
         private void SetResponse(ApiRequest request)
         {
             _cacheService.Add(request, request.ApiRequestID);
+        }
+
+        private Guid GetClientRequestId()
+        {
+            if (_httpCtx.HttpContext != null)
+            {
+                if (_httpCtx.HttpContext.Request.Headers
+                    .TryGetValue(_idempotencyOptions.ClientRequestIdHeader, out StringValues clientRequestIdValue))
+                {
+                    if (Guid.TryParse(clientRequestIdValue, out Guid clientRequestId))
+                    {
+                        return clientRequestId;
+                    }
+                    else
+                    {
+                        return Guid.Empty;
+                    }
+                }
+                else
+                {
+                    return Guid.Empty;
+                }
+            }
+
+            throw new ClientRequestIdNotFoundException("Cannot obtain client request ID: no http context.");
         }
     }
 }

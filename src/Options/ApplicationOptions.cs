@@ -36,5 +36,8 @@ namespace YA.ServiceTemplate.Options
 
         [Required]
         public GeneralOptions General { get; set; }
+
+        [Required]
+        public IdempotencyControlOptions IdempotencyControl { get; set; }
     }
 }

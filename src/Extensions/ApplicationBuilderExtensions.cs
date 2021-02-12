@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
@@ -100,6 +100,15 @@ namespace YA.ServiceTemplate.Extensions
         {
             return application
                 .UseMiddleware<HttpExceptionHandler>();
+        }
+
+        /// <summary>
+        /// Добавляет прослойку логирования идентификатора клиентского запроса
+        /// </summary>
+        public static IApplicationBuilder UseClientRequestContextLogging(this IApplicationBuilder application)
+        {
+            return application
+                .UseMiddleware<ClientRequestContextLogger>();
         }
     }
 }

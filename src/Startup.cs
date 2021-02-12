@@ -29,19 +29,6 @@ namespace YA.ServiceTemplate
     /// </summary>
     public class Startup
     {
-        private readonly IConfiguration _config;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-
-        // controller design generator search for this
-        private IConfiguration Configuration { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Startup"/> class.
-        /// </summary>
-        /// <param name="configuration">The application configuration, where key value pair settings are stored. See
-        /// http://docs.asp.net/en/latest/fundamentals/configuration.html</param>
-        /// <param name="webHostEnvironment">The environment the application is running under. This can be Development,
-        /// Staging or Production by default. See http://docs.asp.net/en/latest/fundamentals/environments.html</param>
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             _config = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -49,6 +36,12 @@ namespace YA.ServiceTemplate
 
             Configuration = configuration;
         }
+
+        private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        // controller design generator search for this
+        private IConfiguration Configuration { get; }
 
         /// <summary>
         /// Configures the services to add to the ASP.NET Core Injection of Control (IoC) container. This method gets called by the ASP.NET runtime. See
@@ -62,6 +55,7 @@ namespace YA.ServiceTemplate
 
             AppSecrets secrets = _config.GetSection(nameof(AppSecrets)).Get<AppSecrets>();
             GeneralOptions generalOptions = _config.GetSection(nameof(ApplicationOptions.General)).Get<GeneralOptions>();
+            IdempotencyControlOptions idempotencyOptions = _config.GetSection(nameof(ApplicationOptions.IdempotencyControl)).Get<IdempotencyControlOptions>();
 
             AWSOptions awsOptions = _config.GetAWSOptions();
             services.AddDefaultAWSOptions(awsOptions);
@@ -85,7 +79,7 @@ namespace YA.ServiceTemplate
                 .AddResponseCaching()
                 .AddCustomResponseCompression(_config)
                 .AddCustomHealthChecks()
-                .AddCustomSwagger()
+                .AddCustomSwagger(idempotencyOptions)
                 .AddHttpContextAccessor()
 
                 .AddSingleton<IActionContextAccessor, ActionContextAccessor>()
@@ -120,6 +114,13 @@ namespace YA.ServiceTemplate
         /// </summary>
         public void Configure(IApplicationBuilder application)
         {
+            IdempotencyControlOptions idempotencyOptions = _config.GetSection(nameof(ApplicationOptions.IdempotencyControl)).Get<IdempotencyControlOptions>();
+
+            if (idempotencyOptions.IdempotencyFilterEnabled.HasValue && idempotencyOptions.IdempotencyFilterEnabled.Value)
+            {
+                application.UseClientRequestContextLogging();
+            }
+
             application
                 .UseCorrelationId()
 
