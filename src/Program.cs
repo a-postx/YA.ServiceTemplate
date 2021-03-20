@@ -10,9 +10,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
+using Prometheus.DotNetRuntime;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
+using Serilog.Extensions.Hosting;
 using Serilog.Sinks.Logz.Io;
 using System;
 using System.Diagnostics;
@@ -50,71 +51,59 @@ namespace YA.ServiceTemplate
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 
-            OsPlatform = GetOs();
+            Log.Logger = CreateBootstrapLogger();
 
-            IHostBuilder builder = CreateHostBuilder(args);
-
-            IHost host;
+            IDisposable dotNetRuntimeStats = null;
 
             try
             {
-                Console.WriteLine("Building Host...");
+                Log.Information("Building Host...");
 
-                host = builder.Build();
+                OsPlatform = GetOs();
 
-                Console.WriteLine("Host built successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error building Host: {ex}.");
-                return 1;
-            }
+                IHost host = CreateHostBuilder(args).Build();
 
-            try
-            {
-                Log.Logger = CreateLogger(host);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error building logger: {ex}.");
-                return 1;
-            }
+                Log.Information("Host built successfully.");
 
-            string coreCLR = ((AssemblyInformationalVersionAttribute[])typeof(object).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
-            string coreFX = ((AssemblyInformationalVersionAttribute[])typeof(Uri).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
+                IHostEnvironment hostEnvironment = host.Services.GetRequiredService<IHostEnvironment>();
+                Log.Information("Hosting environment is {EnvironmentName}", hostEnvironment.EnvironmentName);
 
-            Log.Information("Application.Name: {AppName}\n Application.Version: {AppVersion}\n " +
-                "Environment.Version: {EnvVersion}\n RuntimeInformation.FrameworkDescription: {RuntimeInfo}\n " +
-                "CoreCLR Build: {CoreClrBuild}\n CoreCLR Hash: {CoreClrHash}\n " +
-                "CoreFX Build: {CoreFxBuild}\n CoreFX Hash: {CoreFxHash}\n " +
-                "Environment.OSVersion {OsVersion}\n RuntimeInformation.OSDescription: {OsDescr}\n " +
-                "RuntimeInformation.OSArchitecture: {OsArch}\n Environment.ProcessorCount: {CpuCount}",
-                AppName, AppVersion, Environment.Version, RuntimeInformation.FrameworkDescription, coreCLR.Split('+')[0],
-                coreCLR.Split('+')[1], coreFX.Split('+')[0], coreFX.Split('+')[1], Environment.OSVersion,
-                RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture, Environment.ProcessorCount);
+                string coreCLR = ((AssemblyInformationalVersionAttribute[])typeof(object).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
+                string coreFX = ((AssemblyInformationalVersionAttribute[])typeof(Uri).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
 
-            IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
-            using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-            {
-                Country = await geoService.GetCountryCodeAsync(cts.Token);
-            }
+                Log.Information("Application.Name: {AppName}\n Application.Version: {AppVersion}\n " +
+                    "Environment.Version: {EnvVersion}\n RuntimeInformation.FrameworkDescription: {RuntimeInfo}\n " +
+                    "CoreCLR Build: {CoreClrBuild}\n CoreCLR Hash: {CoreClrHash}\n " +
+                    "CoreFX Build: {CoreFxBuild}\n CoreFX Hash: {CoreFxHash}\n " +
+                    "Environment.OSVersion {OsVersion}\n RuntimeInformation.OSDescription: {OsDescr}\n " +
+                    "RuntimeInformation.OSArchitecture: {OsArch}\n Environment.ProcessorCount: {CpuCount}",
+                    AppName, AppVersion, Environment.Version, RuntimeInformation.FrameworkDescription, coreCLR.Split('+')[0],
+                    coreCLR.Split('+')[1], coreFX.Split('+')[0], coreFX.Split('+')[1], Environment.OSVersion,
+                    RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture, Environment.ProcessorCount);
 
-            IHostApplicationLifetime hostLifetime = host.Services.GetService<IHostApplicationLifetime>();
-            hostLifetime.ApplicationStopping.Register(() =>
-            {
-                host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Shutdown has been initiated.");
-            });
+                IRuntimeGeoDataService geoService = host.Services.GetService<IRuntimeGeoDataService>();
+                using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                {
+                    Country = await geoService.GetCountryCodeAsync(cts.Token);
+                }
 
-            IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
-            //вызывается дважды при изменениях на файловой системе https://github.com/dotnet/aspnetcore/issues/2542
-            ChangeToken.OnChange(configuration.GetReloadToken, () =>
-            {
-                host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Options or secrets has been modified.");
-            });
+                IHostApplicationLifetime hostLifetime = host.Services.GetService<IHostApplicationLifetime>();
+                hostLifetime.ApplicationStopping.Register(() =>
+                {
+                    host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Shutdown has been initiated.");
+                });
 
-            try
-            {
-                await host.RunAsync();
+                IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
+                //вызывается дважды при изменениях на файловой системе https://github.com/dotnet/aspnetcore/issues/2542
+                ChangeToken.OnChange(configuration.GetReloadToken, () =>
+                {
+                    host.Services.GetRequiredService<ILogger<Startup>>().LogInformation("Options or secrets has been modified.");
+                });
+
+                dotNetRuntimeStats = DotNetRuntimeStatsBuilder.Default().StartCollecting();
+
+                await host.RunAsync().ConfigureAwait(false);
+
                 Log.Information("{AppName} has stopped.", AppName);
                 return 0;
             }
@@ -125,6 +114,7 @@ namespace YA.ServiceTemplate
             }
             finally
             {
+                dotNetRuntimeStats?.Dispose();
                 Log.CloseAndFlush();
             }
         }
@@ -141,7 +131,7 @@ namespace YA.ServiceTemplate
                             x => x.AddCommandLine(args)))
                 .ConfigureAppConfiguration((hostingContext, config) =>
                     AddConfiguration(config, hostingContext.HostingEnvironment, args))
-                .UseSerilog()
+                .UseSerilog(ConfigureReloadableLogger)
                 .UseDefaultServiceProvider(
                     (context, options) =>
                     {
@@ -179,8 +169,6 @@ namespace YA.ServiceTemplate
 
         private static IConfigurationBuilder AddConfiguration(IConfigurationBuilder configurationBuilder, IHostEnvironment hostingEnvironment, string[] args)
         {
-            Console.WriteLine("Hosting environment is " + hostingEnvironment.EnvironmentName);
-
             IConfigurationRoot tempConfig = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
@@ -220,13 +208,26 @@ namespace YA.ServiceTemplate
             return configurationBuilder;
         }
 
-        private static Logger CreateLogger(IHost host)
+        /// <summary>
+        /// Creates a logger used during application initialization.
+        /// <see href="https://nblumhardt.com/2020/10/bootstrap-logger/"/>.
+        /// </summary>
+        /// <returns>A logger that can load a new configuration.</returns>
+        private static ReloadableLogger CreateBootstrapLogger()
         {
-            IHostEnvironment hostEnv = host.Services.GetRequiredService<IHostEnvironment>();
-            IConfiguration configuration = host.Services.GetRequiredService<IConfiguration>();
-            AppSecrets secrets = host.Services.GetRequiredService<IOptions<AppSecrets>>().Value;
+            return new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
+        }
 
-            LoggerConfiguration loggerConfig = new LoggerConfiguration();
+        /// <summary>
+        /// Добавляет расширенный логер с засылкой данных в удалённые системы
+        /// </summary>
+        private static void ConfigureReloadableLogger(HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfig)
+        {
+            IHostEnvironment hostEnv = services.GetRequiredService<IHostEnvironment>();
+            IConfiguration configuration = services.GetRequiredService<IConfiguration>();
+            AppSecrets secrets = services.GetRequiredService<IOptions<AppSecrets>>().Value;
 
             loggerConfig
                 .ReadFrom.Configuration(configuration)
@@ -259,14 +260,10 @@ namespace YA.ServiceTemplate
                     });
             }
 
-            Logger logger = loggerConfig.CreateLogger();
-
             if (string.IsNullOrEmpty(secrets.AppInsightsInstrumentationKey) && string.IsNullOrEmpty(secrets.LogzioToken))
             {
-                logger.Warning("Sending logs to remote log managment systems is disabled.");
+                Log.Warning("Sending logs to remote log managment systems is disabled.");
             }
-            
-            return logger;
         }
 
         /// <summary>

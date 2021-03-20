@@ -5,15 +5,11 @@ using System.Linq;
 using System.Reflection;
 using CorrelationId.DependencyInjection;
 using Delobytes.AspNetCore;
-using Delobytes.AspNetCore.Swagger;
-using Delobytes.AspNetCore.Swagger.OperationFilters;
-using Delobytes.AspNetCore.Swagger.SchemaFilters;
 using GreenPipes;
 using MassTransit;
 using MassTransit.Audit;
 using MassTransit.PrometheusIntegration;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -24,8 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Health;
 using YA.ServiceTemplate.Health.Services;
@@ -33,7 +28,7 @@ using YA.ServiceTemplate.Health.System;
 using YA.ServiceTemplate.Infrastructure.Messaging;
 using YA.ServiceTemplate.Infrastructure.Messaging.Consumers;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
-using YA.ServiceTemplate.OperationFilters;
+using YA.ServiceTemplate.OpenApi;
 using YA.ServiceTemplate.Options;
 using YA.ServiceTemplate.Options.Validators;
 
@@ -224,46 +219,11 @@ namespace YA.ServiceTemplate.Extensions
         /// </summary>
         public static IServiceCollection AddCustomSwagger(this IServiceCollection services, IdempotencyControlOptions idempotencyOptions)
         {
-            return services.AddSwaggerGen(options =>
-                {
-                    Assembly assembly = typeof(Startup).Assembly;
-                    string assemblyProduct = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
-                    string assemblyDescription = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
+            services
+                .AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>()
+                .AddSwaggerGen();
 
-                    options.DescribeAllParametersInCamelCase();
-                    options.EnableAnnotations();
-                    options.AddFluentValidationRules();
-
-                    // Add the XML comment file for this assembly, so its contents can be displayed.
-                    options.IncludeXmlCommentsIfExists(assembly);
-
-                    options.OperationFilter<ApiVersionOperationFilter>();
-
-                    if (idempotencyOptions.IdempotencyFilterEnabled.HasValue && idempotencyOptions.IdempotencyFilterEnabled.Value)
-                    {
-                        options.OperationFilter<ClientRequestIdOperationFilter>(idempotencyOptions.ClientRequestIdHeader);
-                    }
-
-                    options.OperationFilter<ContentTypeOperationFilter>();
-
-                    // Show an example model for JsonPatchDocument<T>.
-                    options.SchemaFilter<JsonPatchDocumentSchemaFilter>();
-
-                    IApiVersionDescriptionProvider provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
-
-                    foreach (ApiVersionDescription apiVersionDescription in provider.ApiVersionDescriptions)
-                    {
-                        OpenApiInfo info = new OpenApiInfo()
-                        {
-                            Title = assemblyProduct,
-                            Description = apiVersionDescription.IsDeprecated
-                                ? $"{assemblyDescription} This API version has been deprecated."
-                                : assemblyDescription,
-                            Version = apiVersionDescription.ApiVersion.ToString(),
-                        };
-                        options.SwaggerDoc(apiVersionDescription.GroupName, info);
-                    }
-                });
+            return services;
         }
 
         /// <summary>

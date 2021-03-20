@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace YA.ServiceTemplate.OperationFilters
+namespace YA.ServiceTemplate.OpenApi.OperationFilters
 {
     /// <summary>
     /// An Open API operation filter used to document the implicit API version parameter.
