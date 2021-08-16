@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,8 +34,7 @@ namespace YA.ServiceTemplate.Health.System
 
             IPAddress ipAddress = IPAddress.Parse(opts.InternetHost);
 
-            Stopwatch discoverySw = new Stopwatch();
-            discoverySw.Start();            
+            DateTime startDt = DateTime.UtcNow;
 
             try
             {
@@ -47,9 +45,10 @@ namespace YA.ServiceTemplate.Health.System
                 _log.LogError(ex, "Error checking health for Network");
             }
 
-            discoverySw.Stop();
+            DateTime stopDt = DateTime.UtcNow;
+            TimeSpan processingTime = stopDt - startDt;
 
-            int networkCheckTime = (int)discoverySw.ElapsedMilliseconds;
+            int networkCheckTime = (int)processingTime.TotalMilliseconds;
 
             Dictionary<string, object> data = new Dictionary<string, object>
             {

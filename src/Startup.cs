@@ -4,6 +4,7 @@ using Amazon.Extensions.NETCore.Setup;
 using CorrelationId;
 using Delobytes.AspNetCore;
 using MediatR;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -80,6 +81,7 @@ namespace YA.ServiceTemplate
                 .AddCustomResponseCompression(_config)
                 .AddCustomHealthChecks()
                 .AddCustomSwagger(idempotencyOptions)
+                .AddFluentValidationRulesToSwagger()
                 .AddHttpContextAccessor()
 
                 .AddSingleton<IActionContextAccessor, ActionContextAccessor>()

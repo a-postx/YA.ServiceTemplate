@@ -247,8 +247,6 @@ namespace YA.ServiceTemplate.Extensions
                     cfg.ConnectSendAuditObservers(auditStore, c => c.Exclude(typeof(IServiceTemplateTestRequestV1), typeof(IServiceTemplateTestResponseV1)));
                     cfg.ConnectConsumeAuditObserver(auditStore, c => c.Exclude(typeof(IServiceTemplateTestRequestV1), typeof(IServiceTemplateTestResponseV1)));
 
-                    cfg.UseHealthCheck(context);
-
                     cfg.UseSerilogMessagePropertiesEnricher();
                     cfg.UsePrometheusMetrics();
 

@@ -1,10 +1,9 @@
-using MassTransit;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
 
 namespace YA.ServiceTemplate.Health.Services
@@ -27,8 +26,7 @@ namespace YA.ServiceTemplate.Health.Services
             Response<IServiceTemplateTestResponseV1> response = null;
             Dictionary<string, object> healthData = new Dictionary<string, object>();
 
-            Stopwatch mbSw = new Stopwatch();
-            mbSw.Start();
+            DateTime startDt = DateTime.UtcNow;
 
             try
             {
@@ -41,8 +39,9 @@ namespace YA.ServiceTemplate.Health.Services
             }
             finally
             {
-                mbSw.Stop();
-                healthData.Add("Delay, msec", mbSw.ElapsedMilliseconds);
+                DateTime stopDt = DateTime.UtcNow;
+                TimeSpan processingTime = stopDt - startDt;
+                healthData.Add("Delay, msec", (int)processingTime.TotalMilliseconds);
             }
 
             return (response?.Message?.GotIt == now) ?

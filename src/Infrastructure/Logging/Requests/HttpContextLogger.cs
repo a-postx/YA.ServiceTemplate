@@ -1,16 +1,15 @@
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Context;
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Constants;
 using YA.ServiceTemplate.Options;
@@ -79,11 +78,12 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                         Stream originalResponseBodyReference = context.Response.Body;
                         context.Response.Body = responseBodyMemoryStream;
 
-                        long start = Stopwatch.GetTimestamp();
+                        DateTime startDt = DateTime.UtcNow;
 
                         await _next(context);
 
-                        double elapsedMs = GetElapsedMilliseconds(start, Stopwatch.GetTimestamp());
+                        DateTime stopDt = DateTime.UtcNow;
+                        TimeSpan elapsedTimespan = stopDt - startDt;
 
                         context.Response.Body.Seek(0, SeekOrigin.Begin);
 
@@ -101,7 +101,7 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                             Log.ForContext(Logs.ResponseHeaders, context.Response.Headers.ToDictionary(h => h.Key, h => h.Value.ToString()), true)
                                 .ForContext(Logs.StatusCode, context.Response.StatusCode)
                                 .ForContext(Logs.ResponseBody, endResponseBody)
-                                .ForContext(Logs.ElapsedMilliseconds, elapsedMs)
+                                .ForContext(Logs.ElapsedMilliseconds, (int)elapsedTimespan.TotalMilliseconds)
                                 .ForContext(Logs.RequestProtocol, context.Request.Protocol)
                                 .ForContext(Logs.RequestScheme, context.Request.Scheme)
                                 .ForContext(Logs.RequestHost, context.Request.Host.Value)
@@ -110,18 +110,13 @@ namespace YA.ServiceTemplate.Infrastructure.Logging.Requests
                                 .ForContext(Logs.RequestQuery, context.Request.QueryString)
                                 .ForContext(Logs.RequestPathAndQuery, GetFullPath(context))
                                 .ForContext(Logs.RequestAborted, context.RequestAborted.IsCancellationRequested)
-                                .Information("{RequestMethod} {RequestPath} - {StatusCode} in {ElapsedMilliseconds} ms", context.Request.Method, context.Request.Path, context.Response.StatusCode, elapsedMs);
+                                .Information("HTTP request handled.");
 
                             await responseBodyMemoryStream.CopyToAsync(originalResponseBodyReference, lifetime.ApplicationStopping);
                         }
                     }
                 }
             }
-        }
-
-        private static double GetElapsedMilliseconds(long start, long stop)
-        {
-            return (stop - start) * 1000 / (double)Stopwatch.Frequency;
         }
 
         private static string GetFullPath(HttpContext httpContext)

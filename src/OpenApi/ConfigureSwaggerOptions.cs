@@ -31,7 +31,6 @@ namespace YA.ServiceTemplate.OpenApi
 
             options.DescribeAllParametersInCamelCase();
             options.EnableAnnotations();
-            options.AddFluentValidationRules();
 
             // Add the XML comment file for this assembly, so its contents can be displayed.
             options.IncludeXmlCommentsIfExists(assembly);
@@ -40,7 +39,7 @@ namespace YA.ServiceTemplate.OpenApi
 
             if (_idempotencyOptions.IdempotencyFilterEnabled.HasValue && _idempotencyOptions.IdempotencyFilterEnabled.Value)
             {
-                options.OperationFilter<ClientRequestIdOperationFilter>(_idempotencyOptions.ClientRequestIdHeader);
+                options.OperationFilter<IdempotencyKeyOperationFilter>(_idempotencyOptions.ClientRequestIdHeader);
             }
 
             options.OperationFilter<ContentTypeOperationFilter>();
