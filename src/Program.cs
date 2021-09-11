@@ -54,6 +54,7 @@ namespace YA.ServiceTemplate
             Log.Logger = CreateBootstrapLogger();
 
             IDisposable dotNetRuntimeStats = null;
+            IHostEnvironment hostEnvironment = null;
 
             try
             {
@@ -65,7 +66,7 @@ namespace YA.ServiceTemplate
 
                 Log.Information("Host built successfully.");
 
-                IHostEnvironment hostEnvironment = host.Services.GetRequiredService<IHostEnvironment>();
+                hostEnvironment = host.Services.GetRequiredService<IHostEnvironment>();
                 Log.Information("Hosting environment is {EnvironmentName}", hostEnvironment.EnvironmentName);
 
                 string coreCLR = ((AssemblyInformationalVersionAttribute[])typeof(object).Assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))[0].InformationalVersion;
@@ -107,9 +108,11 @@ namespace YA.ServiceTemplate
                 Log.Information("{AppName} has stopped.", AppName);
                 return 0;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
-                Log.Fatal(ex, "{AppName} terminated unexpectedly.", AppName);
+                Log.Fatal(ex, "{AppName} terminated unexpectedly in {Environment} mode.", AppName, hostEnvironment?.EnvironmentName);
                 return 1;
             }
             finally

@@ -131,15 +131,14 @@ namespace YA.ServiceTemplate
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor
                 })
 
-                .UseResponseCaching()
-                .UseResponseCompression()
-
                 .UseNetworkContextLogging()
                 .UseHttpContextLogging()
                 .UseCustomExceptionHandler()
 
                 .UseRouting()
                 .UseCors(CorsPolicyName.AllowAny)
+                .UseResponseCaching()
+                .UseResponseCompression()
                 .UseStaticFilesWithCacheControl()
 
                 .UseIf(

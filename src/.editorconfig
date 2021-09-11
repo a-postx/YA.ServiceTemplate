@@ -189,6 +189,7 @@ dotnet_code_quality_unused_parameters = all:suggestion
 dotnet_style_operator_placement_when_wrapping = end_of_line
 # https://github.com/dotnet/roslyn/pull/40070
 dotnet_style_prefer_simplified_interpolation = true:warning
+dotnet_style_namespace_match_folder = true:suggestion
 # Expression-bodied members
 # https://docs.microsoft.com/visualstudio/ide/editorconfig-language-conventions#expression-bodied-members
 csharp_style_expression_bodied_methods = false:suggestion
