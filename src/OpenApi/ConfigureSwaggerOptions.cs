@@ -6,62 +6,60 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using YA.ServiceTemplate.OpenApi.OperationFilters;
 using YA.ServiceTemplate.Options;
 
-namespace YA.ServiceTemplate.OpenApi
+namespace YA.ServiceTemplate.OpenApi;
+
+public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
-    public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider,
+        IOptions<IdempotencyOptions> idempotencyOptions)
     {
-        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider,
-            IOptions<IdempotencyControlOptions> idempotencyOptions)
+        _provider = provider;
+        _idempotencyOptions = idempotencyOptions.Value;
+    }
+
+    private readonly IApiVersionDescriptionProvider _provider;
+    private readonly IdempotencyOptions _idempotencyOptions;
+
+    public void Configure(SwaggerGenOptions options)
+    {
+        Assembly assembly = typeof(Startup).Assembly;
+
+        options.DescribeAllParametersInCamelCase();
+        options.EnableAnnotations();
+
+        // Add the XML comment file for this assembly, so its contents can be displayed.
+        options.IncludeXmlCommentsIfExists(assembly);
+
+        options.OperationFilter<ApiVersionOperationFilter>();
+
+        if (_idempotencyOptions.IdempotencyFilterEnabled.HasValue && _idempotencyOptions.IdempotencyFilterEnabled.Value)
         {
-            _provider = provider;
-            _idempotencyOptions = idempotencyOptions.Value;
+            options.OperationFilter<IdempotencyKeyOperationFilter>(_idempotencyOptions.IdempotencyHeader);
         }
 
-        private readonly IApiVersionDescriptionProvider _provider;
-        private readonly IdempotencyControlOptions _idempotencyOptions;
+        options.OperationFilter<ContentTypeOperationFilter>();
+        options.OperationFilter<ProblemDetailsOperationFilter>();
+        // Show an example model for JsonPatchDocument<T>.
+        options.SchemaFilter<JsonPatchDocumentSchemaFilter>();
 
-        public void Configure(SwaggerGenOptions options)
+        string assemblyProduct = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+        string assemblyDescription = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
+
+        foreach (ApiVersionDescription apiVersionDescription in _provider.ApiVersionDescriptions)
         {
-            Assembly assembly = typeof(Startup).Assembly;
-
-            options.DescribeAllParametersInCamelCase();
-            options.EnableAnnotations();
-
-            // Add the XML comment file for this assembly, so its contents can be displayed.
-            options.IncludeXmlCommentsIfExists(assembly);
-
-            options.OperationFilter<ApiVersionOperationFilter>();
-
-            if (_idempotencyOptions.IdempotencyFilterEnabled.HasValue && _idempotencyOptions.IdempotencyFilterEnabled.Value)
+            OpenApiInfo info = new OpenApiInfo()
             {
-                options.OperationFilter<IdempotencyKeyOperationFilter>(_idempotencyOptions.ClientRequestIdHeader);
-            }
-
-            options.OperationFilter<ContentTypeOperationFilter>();
-
-            // Show an example model for JsonPatchDocument<T>.
-            options.SchemaFilter<JsonPatchDocumentSchemaFilter>();
-
-            string assemblyProduct = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
-            string assemblyDescription = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
-
-            foreach (ApiVersionDescription apiVersionDescription in _provider.ApiVersionDescriptions)
-            {
-                OpenApiInfo info = new OpenApiInfo()
-                {
-                    Title = assemblyProduct,
-                    Description = apiVersionDescription.IsDeprecated
-                        ? $"{assemblyDescription} This API version has been deprecated."
-                        : assemblyDescription,
-                    Version = apiVersionDescription.ApiVersion.ToString()
-                };
-                options.SwaggerDoc(apiVersionDescription.GroupName, info);
-            }
+                Title = assemblyProduct,
+                Description = apiVersionDescription.IsDeprecated
+                    ? $"{assemblyDescription} This API version has been deprecated."
+                    : assemblyDescription,
+                Version = apiVersionDescription.ApiVersion.ToString()
+            };
+            options.SwaggerDoc(apiVersionDescription.GroupName, info);
         }
     }
 }

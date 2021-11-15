@@ -1,6 +1,5 @@
-﻿namespace YA.ServiceTemplate.Application.Features
+namespace YA.ServiceTemplate.Application.Features;
+
+public class Empty
 {
-    public class Empty
-    {
-    }
 }

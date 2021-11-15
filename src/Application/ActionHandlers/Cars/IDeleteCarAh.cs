@@ -1,9 +1,8 @@
-﻿using Delobytes.AspNetCore;
+using Delobytes.AspNetCore;
 
-namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
+namespace YA.ServiceTemplate.Application.ActionHandlers.Cars;
+
+public interface IDeleteCarAh : IAsyncCommand<int>
 {
-    public interface IDeleteCarAh : IAsyncCommand<int>
-    {
 
-    }
 }

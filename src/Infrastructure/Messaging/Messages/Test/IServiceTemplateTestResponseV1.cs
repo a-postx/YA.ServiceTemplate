@@ -1,9 +1,6 @@
-﻿using System;
+namespace YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test;
 
-namespace YA.ServiceTemplate.Infrastructure.Messaging.Messages.Test
+public interface IServiceTemplateTestResponseV1
 {
-    public interface IServiceTemplateTestResponseV1
-    {
-        DateTime GotIt { get; }
-    }
+    DateTime GotIt { get; }
 }

@@ -1,8 +1,7 @@
-namespace YA.ServiceTemplate.Options
+namespace YA.ServiceTemplate.Options;
+
+public class AwsOptions
 {
-    public class AwsOptions
-    {
-        public string Region { get; set; }
-        public string Profile { get; set; }
-    }
+    public string Region { get; set; }
+    public string Profile { get; set; }
 }

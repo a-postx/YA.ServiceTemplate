@@ -1,26 +1,24 @@
-﻿using GreenPipes;
-using System;
+using GreenPipes;
 
-namespace YA.ServiceTemplate.Infrastructure.Messaging.Filters
+namespace YA.ServiceTemplate.Infrastructure.Messaging.Filters;
+
+/// <summary>
+/// Manages a Logical Call Context variable containing a stack of <see cref="PipeContext"/> instances.
+/// </summary>
+internal static class MbMessageContextStack
 {
     /// <summary>
-    /// Manages a Logical Call Context variable containing a stack of <see cref="PipeContext"/> instances.
+    /// Publishes a <see cref="PipeContext"/> onto the stack.
     /// </summary>
-    internal static class MbMessageContextStack
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static IDisposable Push(PipeContext context)
     {
-        /// <summary>
-        /// Publishes a <see cref="PipeContext"/> onto the stack.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static IDisposable Push(PipeContext context)
-        {
-            return MbMessageAsyncLocalStackWrapper<PipeContext>.Push(context);
-        }
-
-        /// <summary>
-        /// Gets the current <see cref="PipeContext"/>.
-        /// </summary>
-        public static PipeContext Current => MbMessageAsyncLocalStackWrapper<PipeContext>.Current;
+        return MbMessageAsyncLocalStackWrapper<PipeContext>.Push(context);
     }
+
+    /// <summary>
+    /// Gets the current <see cref="PipeContext"/>.
+    /// </summary>
+    public static PipeContext Current => MbMessageAsyncLocalStackWrapper<PipeContext>.Current;
 }

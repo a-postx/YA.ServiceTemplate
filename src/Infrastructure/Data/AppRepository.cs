@@ -1,26 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using YA.ServiceTemplate.Core.Entities;
 using YA.ServiceTemplate.Extensions;
 
-namespace YA.ServiceTemplate.Infrastructure.Data
+namespace YA.ServiceTemplate.Infrastructure.Data;
+
+/// <summary>
+/// Baseline car repository with some cars.
+/// </summary>
+public class AppRepository : IAppRepository
 {
-    /// <summary>
-    /// Baseline car repository with some cars.
-    /// </summary>
-    public class AppRepository : IAppRepository
+    private readonly List<ApiRequest> ApiRequests;
+    private readonly List<Car> Cars;
+
+    public AppRepository()
     {
-        private readonly List<ApiRequest> ApiRequests;
-        private readonly List<Car> Cars;
+        ApiRequests = new List<ApiRequest>();
 
-        public AppRepository()
-        {
-            ApiRequests = new List<ApiRequest>();
-
-            Cars = new List<Car>()
+        Cars = new List<Car>()
             {
                 new Car()
                 {
@@ -77,127 +72,126 @@ namespace YA.ServiceTemplate.Infrastructure.Data
                     Modified = DateTimeOffset.UtcNow.AddDays(-1),
                 },
             };
-        }
+    }
 
-        public Task<Car> AddAsync(Car car, CancellationToken cancellationToken)
+    public Task<Car> AddAsync(Car car, CancellationToken cancellationToken)
+    {
+        if (car is null)
         {
-            if (car is null)
-            {
-                throw new ArgumentNullException(nameof(car));
-            }
-
-            Cars.Add(car);
-            car.CarId = Cars.Max(x => x.CarId) + 1;
-            return Task.FromResult(car);
+            throw new ArgumentNullException(nameof(car));
         }
 
-        public Task DeleteAsync(Car car, CancellationToken cancellationToken)
+        Cars.Add(car);
+        car.CarId = Cars.Max(x => x.CarId) + 1;
+        return Task.FromResult(car);
+    }
+
+    public Task DeleteAsync(Car car, CancellationToken cancellationToken)
+    {
+        if (Cars.Contains(car))
         {
-            if (Cars.Contains(car))
-            {
-                Cars.Remove(car);
-            }
-
-            return Task.CompletedTask;
+            Cars.Remove(car);
         }
 
-        public Task<Car> GetAsync(int carId, CancellationToken cancellationToken)
+        return Task.CompletedTask;
+    }
+
+    public Task<Car> GetAsync(int carId, CancellationToken cancellationToken)
+    {
+        Car car = Cars.FirstOrDefault(x => x.CarId == carId);
+        return Task.FromResult(car);
+    }
+
+    public Task<List<Car>> GetCarsAsync(
+        int? first,
+        DateTimeOffset? createdAfter,
+        DateTimeOffset? createdBefore,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(Cars
+            .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
+            .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
+            .If(first.HasValue, x => x.Take(first.Value))
+            .ToList());
+
+    public Task<List<Car>> GetCarsReverseAsync(
+        int? last,
+        DateTimeOffset? createdAfter,
+        DateTimeOffset? createdBefore,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(Cars
+            .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
+            .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
+            .If(last.HasValue, x => x.TakeLast(last.Value))
+            .ToList());
+
+    public Task<bool> GetHasNextPageAsync(
+        int? first,
+        DateTimeOffset? createdAfter,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(Cars
+            .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
+            .Skip(first.Value)
+            .Any());
+
+    public Task<bool> GetHasPreviousPagAsync(
+        int? last,
+        DateTimeOffset? createdBefore,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(Cars
+            .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
+            .SkipLast(last.Value)
+            .Any());
+
+    public Task<int> GetTotalCountAsync(CancellationToken cancellationToken) => Task.FromResult(Cars.Count);
+
+    public Task<ICollection<Car>> GetPageAsync(int page, int count, CancellationToken cancellationToken)
+    {
+        List<Car> pageCars = Cars.Skip(count * (page - 1)).Take(count).ToList();
+
+        if (pageCars.Count == 0)
         {
-            Car car = Cars.FirstOrDefault(x => x.CarId == carId);
-            return Task.FromResult(car);
+            pageCars = null;
         }
 
-        public Task<List<Car>> GetCarsAsync(
-            int? first,
-            DateTimeOffset? createdAfter,
-            DateTimeOffset? createdBefore,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(Cars
-                .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
-                .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
-                .If(first.HasValue, x => x.Take(first.Value))
-                .ToList());
+        return Task.FromResult((ICollection<Car>)pageCars);
+    }
 
-        public Task<List<Car>> GetCarsReverseAsync(
-            int? last,
-            DateTimeOffset? createdAfter,
-            DateTimeOffset? createdBefore,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(Cars
-                .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
-                .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
-                .If(last.HasValue, x => x.TakeLast(last.Value))
-                .ToList());
+    public Task<(int totalCount, int totalPages)> GetTotalPagesAsync(int count, CancellationToken cancellationToken)
+    {
+        int totalPages = (int)Math.Ceiling(Cars.Count / (double)count);
+        return Task.FromResult((Cars.Count, totalPages));
+    }
 
-        public Task<bool> GetHasNextPageAsync(
-            int? first,
-            DateTimeOffset? createdAfter,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(Cars
-                .If(createdAfter.HasValue, x => x.Where(y => y.Created > createdAfter.Value))
-                .Skip(first.Value)
-                .Any());
-
-        public Task<bool> GetHasPreviousPagAsync(
-            int? last,
-            DateTimeOffset? createdBefore,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(Cars
-                .If(createdBefore.HasValue, x => x.Where(y => y.Created < createdBefore.Value))
-                .SkipLast(last.Value)
-                .Any());
-
-        public Task<int> GetTotalCountAsync(CancellationToken cancellationToken) => Task.FromResult(Cars.Count);
-
-        public Task<ICollection<Car>> GetPageAsync(int page, int count, CancellationToken cancellationToken)
+    public Task<Car> UpdateAsync(Car car, CancellationToken cancellationToken)
+    {
+        if (car is null)
         {
-            List<Car> pageCars = Cars.Skip(count * (page - 1)).Take(count).ToList();
-
-            if (pageCars.Count == 0)
-            {
-                pageCars = null;
-            }
-
-            return Task.FromResult((ICollection<Car>)pageCars);
+            throw new ArgumentNullException(nameof(car));
         }
 
-        public Task<(int totalCount, int totalPages)> GetTotalPagesAsync(int count, CancellationToken cancellationToken)
-        {
-            int totalPages = (int)Math.Ceiling(Cars.Count / (double)count);
-            return Task.FromResult((Cars.Count, totalPages));
-        }
+        Car existingCar = Cars.FirstOrDefault(x => x.CarId == car.CarId);
 
-        public Task<Car> UpdateAsync(Car car, CancellationToken cancellationToken)
-        {
-            if (car is null)
-            {
-                throw new ArgumentNullException(nameof(car));
-            }
+        existingCar.Cylinders = car.Cylinders;
+        existingCar.Brand = car.Brand;
+        existingCar.Model = car.Model;
 
-            Car existingCar = Cars.FirstOrDefault(x => x.CarId == car.CarId);
+        return Task.FromResult(car);
+    }
 
-            existingCar.Cylinders = car.Cylinders;
-            existingCar.Brand = car.Brand;
-            existingCar.Model = car.Model;
+    public Task<ApiRequest> CreateApiRequestAsync(ApiRequest item)
+    {
+        ApiRequests.Add(item);
+        return Task.FromResult(item);
+    }
 
-            return Task.FromResult(car);
-        }
+    public Task<ApiRequest> GetApiRequestAsync(Guid correlationId)
+    {
+        ApiRequest apiRequest = ApiRequests.FirstOrDefault(ar => ar.ApiRequestID == correlationId);
+        return Task.FromResult(apiRequest);
+    }
 
-        public Task<ApiRequest> CreateApiRequestAsync(ApiRequest item)
-        {
-            ApiRequests.Add(item);
-            return Task.FromResult(item);
-        }
-
-        public Task<ApiRequest> GetApiRequestAsync(Guid correlationId)
-        {
-            ApiRequest apiRequest = ApiRequests.FirstOrDefault(ar => ar.ApiRequestID == correlationId);
-            return Task.FromResult(apiRequest);
-        }
-
-        public Task UpdateApiRequestAsync(ApiRequest request)
-        {
-            return Task.CompletedTask;
-        }
+    public Task UpdateApiRequestAsync(ApiRequest request)
+    {
+        return Task.CompletedTask;
     }
 }

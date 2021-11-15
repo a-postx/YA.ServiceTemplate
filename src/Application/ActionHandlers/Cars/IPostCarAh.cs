@@ -1,10 +1,9 @@
-﻿using Delobytes.AspNetCore;
+using Delobytes.AspNetCore;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 
-namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
-{
-    public interface IPostCarAh : IAsyncCommand<CarSm>
-    {
+namespace YA.ServiceTemplate.Application.ActionHandlers.Cars;
 
-    }
+public interface IPostCarAh : IAsyncCommand<CarSm>
+{
+
 }

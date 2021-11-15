@@ -1,30 +1,28 @@
-using System;
 using System.IO;
 
-namespace YA.ServiceTemplate
+namespace YA.ServiceTemplate;
+
+internal static class Node
 {
-    internal static class Node
+    internal static readonly string Id = GetOrSetNodeId();
+
+    private static string GetOrSetNodeId()
     {
-        internal static readonly string Id = GetOrSetNodeId();
+        string appDataFolder = "AppData";
 
-        private static string GetOrSetNodeId()
+        Directory.CreateDirectory(Path.Combine(Program.RootPath, appDataFolder));
+
+        string filePath = Path.Combine(Program.RootPath, appDataFolder, "nodeid");
+
+        if (!File.Exists(filePath))
         {
-            string appDataFolder = "AppData";
-
-            Directory.CreateDirectory(Path.Combine(Program.RootPath, appDataFolder));
-
-            string filePath = Path.Combine(Program.RootPath, appDataFolder, "nodeid");
-
-            if (!File.Exists(filePath))
-            {
-                string id = Guid.NewGuid().ToString("N");
-                File.WriteAllText(filePath, id);
-                return id;
-            }
-            else
-            {
-                return File.ReadAllText(filePath).Trim();
-            }
+            string id = Guid.NewGuid().ToString("N");
+            File.WriteAllText(filePath, id);
+            return id;
+        }
+        else
+        {
+            return File.ReadAllText(filePath).Trim();
         }
     }
 }

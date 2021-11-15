@@ -1,48 +1,43 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using MediatR;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars.Queries
+namespace YA.ServiceTemplate.Application.Features.Cars.Queries;
+
+public class GetCarCommand : IRequest<ICommandResult<Car>>
 {
-    public class GetCarCommand : IRequest<ICommandResult<Car>>
+    public GetCarCommand(int id)
     {
-        public GetCarCommand(int id)
+        Id = id;
+    }
+
+    public int Id { get; protected set; }
+
+    public class GetCarkHandler : IRequestHandler<GetCarCommand, ICommandResult<Car>>
+    {
+        public GetCarkHandler(ILogger<GetCarkHandler> logger,
+            IAppRepository carRepository)
         {
-            Id = id;
+            _log = logger ?? throw new ArgumentNullException(nameof(logger));
+            _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
         }
 
-        public int Id { get; protected set; }
+        private readonly ILogger<GetCarkHandler> _log;
+        private readonly IAppRepository _carRepository;
 
-        public class GetCarkHandler : IRequestHandler<GetCarCommand, ICommandResult<Car>>
+        public async Task<ICommandResult<Car>> Handle(GetCarCommand command, CancellationToken cancellationToken)
         {
-            public GetCarkHandler(ILogger<GetCarkHandler> logger,
-                IAppRepository carRepository)
+            int carId = command.Id;
+
+            Car car = await _carRepository.GetAsync(carId, cancellationToken);
+
+            if (car == null)
             {
-                _log = logger ?? throw new ArgumentNullException(nameof(logger));
-                _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
+                return new CommandResult<Car>(CommandStatus.NotFound, null);
             }
 
-            private readonly ILogger<GetCarkHandler> _log;
-            private readonly IAppRepository _carRepository;
-
-            public async Task<ICommandResult<Car>> Handle(GetCarCommand command, CancellationToken cancellationToken)
-            {
-                int carId = command.Id;
-
-                Car car = await _carRepository.GetAsync(carId, cancellationToken);
-
-                if (car == null)
-                {
-                    return new CommandResult<Car>(CommandStatus.NotFound, null);
-                }
-
-                return new CommandResult<Car>(CommandStatus.Ok, car);
-            }
+            return new CommandResult<Car>(CommandStatus.Ok, car);
         }
     }
 }

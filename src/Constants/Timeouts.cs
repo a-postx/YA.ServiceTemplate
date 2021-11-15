@@ -1,8 +1,7 @@
-﻿namespace YA.ServiceTemplate.Constants
+namespace YA.ServiceTemplate.Constants;
+
+public static class Timeouts
 {
-    public static class Timeouts
-    {
-        public const int WebHostShutdownTimeoutSec = 60;
-        public const int ApiRequestFilterMs = 60000;
-    }
+    public const int WebHostShutdownTimeoutSec = 60;
+    public const int ApiRequestFilterMs = 60000;
 }

@@ -1,7 +1,6 @@
-namespace YA.ServiceTemplate.Constants
+namespace YA.ServiceTemplate.Constants;
+
+public static class ControllerName
 {
-    public static class ControllerName
-    {
-        public const string Car = nameof(Car);
-    }
+    public const string Car = nameof(Car);
 }

@@ -1,21 +1,18 @@
-﻿using GreenPipes;
-using System.Collections.Generic;
+using GreenPipes;
 
-namespace YA.ServiceTemplate.Infrastructure.Messaging.Filters
+namespace YA.ServiceTemplate.Infrastructure.Messaging.Filters;
+
+public class MbMessageContextFilterPipeSpecification<T> : IPipeSpecification<T> where T : class, PipeContext
 {
-    public class MbMessageContextFilterPipeSpecification<T> : IPipeSpecification<T> where T : class, PipeContext
+    public void Apply(IPipeBuilder<T> builder)
     {
-        public void Apply(IPipeBuilder<T> builder)
-        {
-            var filter = new MbMessageContextFilter<T>();
+        var filter = new MbMessageContextFilter<T>();
 
-            builder.AddFilter(filter);
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            yield break;
-        }
+        builder.AddFilter(filter);
     }
 
+    public IEnumerable<ValidationResult> Validate()
+    {
+        yield break;
+    }
 }

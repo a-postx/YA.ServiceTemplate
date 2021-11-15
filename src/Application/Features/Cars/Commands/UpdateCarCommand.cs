@@ -1,77 +1,72 @@
-﻿using Delobytes.Mapper;
+using Delobytes.Mapper;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Application.Validators;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars.Commands
+namespace YA.ServiceTemplate.Application.Features.Cars.Commands;
+
+public class UpdateCarCommand : IRequest<ICommandResult<Car>>
 {
-    public class UpdateCarCommand : IRequest<ICommandResult<Car>>
+    public UpdateCarCommand(int id, JsonPatchDocument<CarSm> patch)
     {
-        public UpdateCarCommand(int id, JsonPatchDocument<CarSm> patch)
+        Id = id;
+        Patch = patch;
+    }
+
+    public int Id { get; protected set; }
+    public JsonPatchDocument<CarSm> Patch { get; protected set; }
+
+    public class UpdateCarHandler : IRequestHandler<UpdateCarCommand, ICommandResult<Car>>
+    {
+        public UpdateCarHandler(ILogger<UpdateCarHandler> logger,
+            IAppRepository carRepository,
+            IMapper<Car, CarSm> carToCarSmMapper,
+            IMapper<CarSm, Car> carSmToCarMapper)
         {
-            Id = id;
-            Patch = patch;
+            _log = logger ?? throw new ArgumentNullException(nameof(logger));
+            _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
+            _carToCarSmMapper = carToCarSmMapper ?? throw new ArgumentNullException(nameof(carToCarSmMapper));
+            _carSmToCarMapper = carSmToCarMapper ?? throw new ArgumentNullException(nameof(carSmToCarMapper));
         }
 
-        public int Id { get; protected set; }
-        public JsonPatchDocument<CarSm> Patch { get; protected set; }
+        private readonly ILogger<UpdateCarHandler> _log;
+        private readonly IAppRepository _carRepository;
+        private readonly IMapper<Car, CarSm> _carToCarSmMapper;
+        private readonly IMapper<CarSm, Car> _carSmToCarMapper;
 
-        public class UpdateCarHandler : IRequestHandler<UpdateCarCommand, ICommandResult<Car>>
+        public async Task<ICommandResult<Car>> Handle(UpdateCarCommand command, CancellationToken cancellationToken)
         {
-            public UpdateCarHandler(ILogger<UpdateCarHandler> logger,
-                IAppRepository carRepository,
-                IMapper<Car, CarSm> carToCarSmMapper,
-                IMapper<CarSm, Car> carSmToCarMapper)
+            int carId = command.Id;
+
+            Car car = await _carRepository.GetAsync(carId, cancellationToken);
+
+            if (car == null)
             {
-                _log = logger ?? throw new ArgumentNullException(nameof(logger));
-                _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
-                _carToCarSmMapper = carToCarSmMapper ?? throw new ArgumentNullException(nameof(carToCarSmMapper));
-                _carSmToCarMapper = carSmToCarMapper ?? throw new ArgumentNullException(nameof(carSmToCarMapper));
+                return new CommandResult<Car>(CommandStatus.NotFound, null);
             }
 
-            private readonly ILogger<UpdateCarHandler> _log;
-            private readonly IAppRepository _carRepository;
-            private readonly IMapper<Car, CarSm> _carToCarSmMapper;
-            private readonly IMapper<CarSm, Car> _carSmToCarMapper;
+            CarSm carSm = _carToCarSmMapper.Map(car);
 
-            public async Task<ICommandResult<Car>> Handle(UpdateCarCommand command, CancellationToken cancellationToken)
+            command.Patch.ApplyTo(carSm);
+
+            CarSmValidator validator = new CarSmValidator();
+            ValidationResult validationResult = validator.Validate(carSm);
+
+            if (!validationResult.IsValid)
             {
-                int carId = command.Id;
-
-                Car car = await _carRepository.GetAsync(carId, cancellationToken);
-
-                if (car == null)
-                {
-                    return new CommandResult<Car>(CommandStatus.NotFound, null);
-                }
-
-                CarSm carSm = _carToCarSmMapper.Map(car);
-
-                command.Patch.ApplyTo(carSm);
-
-                CarSmValidator validator = new CarSmValidator();
-                ValidationResult validationResult = validator.Validate(carSm);
-
-                if (!validationResult.IsValid)
-                {
-                    return new CommandResult<Car>(CommandStatus.ModelInvalid, null, validationResult);
-                }
-
-                _carSmToCarMapper.Map(carSm, car);
-
-                await _carRepository.UpdateAsync(car, cancellationToken);
-
-                return new CommandResult<Car>(CommandStatus.Ok, car);
+                return new CommandResult<Car>(CommandStatus.ModelInvalid, null, validationResult);
             }
+
+            _carSmToCarMapper.Map(carSm, car);
+
+            await _carRepository.UpdateAsync(car, cancellationToken);
+
+            return new CommandResult<Car>(CommandStatus.Ok, car);
         }
     }
 }

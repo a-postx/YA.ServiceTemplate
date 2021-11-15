@@ -1,30 +1,27 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 
-namespace YA.ServiceTemplate.Options.Validators
+namespace YA.ServiceTemplate.Options.Validators;
+
+public class HostOptionsValidator : IValidateOptions<HostOptions>
 {
-    public class HostOptionsValidator : IValidateOptions<HostOptions>
+    public ValidateOptionsResult Validate(string name, HostOptions options)
     {
-        public ValidateOptionsResult Validate(string name, HostOptions options)
+        List<string> failures = new List<string>();
+
+        // время ожидания, пока все фоновые сервисы остановятся
+        if (options.ShutdownTimeout < TimeSpan.FromSeconds(15))
         {
-            List<string> failures = new List<string>();
+            failures.Add("Host shutdown timeout is lower than 15 seconds which may affect graceful shutdown for long-running processes.");
+        }
 
-            // время ожидания, пока все фоновые сервисы остановятся
-            if (options.ShutdownTimeout < TimeSpan.FromSeconds(15))
-            {
-                failures.Add("Host shutdown timeout is lower than 15 seconds which may affect graceful shutdown for long-running processes.");
-            }
-
-            if (failures.Count > 0)
-            {
-                return ValidateOptionsResult.Fail(failures);
-            }
-            else
-            {
-                return ValidateOptionsResult.Success;
-            }
+        if (failures.Count > 0)
+        {
+            return ValidateOptionsResult.Fail(failures);
+        }
+        else
+        {
+            return ValidateOptionsResult.Success;
         }
     }
 }

@@ -1,36 +1,33 @@
-﻿using System;
+namespace YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Core.Entities
+public class ApiRequest
 {
-    public class ApiRequest
+    private ApiRequest()
     {
-        private ApiRequest()
-        {
-            
-        }
 
-        public ApiRequest(Guid correlationId, DateTime dateTime, string method)
-        {
-            ApiRequestID = correlationId;
-            ApiRequestDateTime = dateTime;
-            Method = method;
-        }
+    }
 
-        public Guid ApiRequestID { get; private set; }
-        public DateTime ApiRequestDateTime { get; private set; }
-        public string Method { get; set; }
-        public int? ResponseStatusCode { get; private set; }
-        public string ResponseBody { get; private set; }
-        public byte[] tstamp { get; set; }
+    public ApiRequest(Guid correlationId, DateTime dateTime, string method)
+    {
+        ApiRequestID = correlationId;
+        ApiRequestDateTime = dateTime;
+        Method = method;
+    }
 
-        public void SetResponseStatusCode(int? statusCode)
-        {
-            ResponseStatusCode = statusCode;
-        }
+    public Guid ApiRequestID { get; private set; }
+    public DateTime ApiRequestDateTime { get; private set; }
+    public string Method { get; set; }
+    public int? ResponseStatusCode { get; private set; }
+    public string ResponseBody { get; private set; }
+    public byte[] tstamp { get; set; }
 
-        public void SetResponseBody(string response)
-        {
-            ResponseBody = response;
-        }
+    public void SetResponseStatusCode(int? statusCode)
+    {
+        ResponseStatusCode = statusCode;
+    }
+
+    public void SetResponseBody(string response)
+    {
+        ResponseBody = response;
     }
 }

@@ -1,39 +1,34 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using MediatR;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 
-namespace YA.ServiceTemplate.Application.Features.SomeAggregate.Commands
+namespace YA.ServiceTemplate.Application.Features.SomeAggregate.Commands;
+
+public class DoSomethingCommand : IRequest<ICommandResult<string>>
 {
-    public class DoSomethingCommand : IRequest<ICommandResult<string>>
+    public DoSomethingCommand(string thingToDo)
     {
-        public DoSomethingCommand(string thingToDo)
+        ThingToDo = thingToDo;
+    }
+
+    public string ThingToDo { get; protected set; }
+
+    public class DoSomethingHandler : IRequestHandler<DoSomethingCommand, ICommandResult<string>>
+    {
+        public DoSomethingHandler(ILogger<DoSomethingHandler> logger)
         {
-            ThingToDo = thingToDo;
+            _log = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public string ThingToDo { get; protected set; }
+        private readonly ILogger<DoSomethingHandler> _log;
 
-        public class DoSomethingHandler : IRequestHandler<DoSomethingCommand, ICommandResult<string>>
+        public async Task<ICommandResult<string>> Handle(DoSomethingCommand command, CancellationToken cancellationToken)
         {
-            public DoSomethingHandler(ILogger<DoSomethingHandler> logger)
-            {
-                _log = logger ?? throw new ArgumentNullException(nameof(logger));
-            }
+            await Task.Delay(1000, cancellationToken);
 
-            private readonly ILogger<DoSomethingHandler> _log;
+            _log.LogInformation("Thing {Thing} done", command.ThingToDo);
 
-            public async Task<ICommandResult<string>> Handle(DoSomethingCommand command, CancellationToken cancellationToken)
-            {
-                await Task.Delay(1000, cancellationToken);
-
-                _log.LogInformation($"Thing {command.ThingToDo} done");
-
-                return new CommandResult<string>(CommandStatus.Ok, "world!");
-            }
+            return new CommandResult<string>(CommandStatus.Ok, "world!");
         }
     }
 }

@@ -6,7 +6,7 @@
   "destinationAddress": "rabbitmq://bear.rmq.cloudamqp.com/aelzlsta/ya.servicetemplate.receiveendpoint",
   "headers": {},
   "messageType": [
-    "urn:message:MbMessages:IDoSomethingMessageV1"
+    "urn:message:MbEvents:ISomethingHappenedEventV1"
   ],
   "message": {
     "correlationId": "c7ff562a-b639-415b-9add-c9e524a727cc",

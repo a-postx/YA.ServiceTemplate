@@ -1,9 +1,8 @@
-﻿using Delobytes.AspNetCore;
+using Delobytes.AspNetCore;
 
-namespace YA.ServiceTemplate.Application.ActionHandlers.Cars
+namespace YA.ServiceTemplate.Application.ActionHandlers.Cars;
+
+public interface IGetCarAh : IAsyncCommand<int>
 {
-    public interface IGetCarAh : IAsyncCommand<int>
-    {
 
-    }
 }

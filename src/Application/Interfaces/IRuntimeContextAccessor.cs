@@ -1,10 +1,7 @@
-using System;
+namespace YA.ServiceTemplate.Application.Interfaces;
 
-namespace YA.ServiceTemplate.Application.Interfaces
+public interface IRuntimeContextAccessor
 {
-    public interface IRuntimeContextAccessor
-    {
-        Guid GetCorrelationId();
-        string GetTraceId();
-    }
+    Guid GetCorrelationId();
+    string GetTraceId();
 }

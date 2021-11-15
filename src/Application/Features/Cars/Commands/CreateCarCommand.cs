@@ -1,49 +1,44 @@
-﻿using Delobytes.Mapper;
+using Delobytes.Mapper;
 using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.SaveModels;
 using YA.ServiceTemplate.Core.Entities;
 
-namespace YA.ServiceTemplate.Application.Features.Cars.Commands
+namespace YA.ServiceTemplate.Application.Features.Cars.Commands;
+
+public class CreateCarCommand : IRequest<ICommandResult<Car>>
 {
-    public class CreateCarCommand : IRequest<ICommandResult<Car>>
+    public CreateCarCommand(CarSm sm)
     {
-        public CreateCarCommand(CarSm sm)
+        CarSm = sm;
+    }
+
+    public CarSm CarSm { get; protected set; }
+
+    public class CreateCarHandler : IRequestHandler<CreateCarCommand, ICommandResult<Car>>
+    {
+        public CreateCarHandler(ILogger<CreateCarHandler> logger,
+            IAppRepository carRepository,
+            IMapper<CarSm, Car> carSmToCarMapper)
         {
-            CarSm = sm;
+            _log = logger ?? throw new ArgumentNullException(nameof(logger));
+            _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
+            _carSmToCarMapper = carSmToCarMapper ?? throw new ArgumentNullException(nameof(carSmToCarMapper));
         }
 
-        public CarSm CarSm { get; protected set; }
+        private readonly ILogger<CreateCarHandler> _log;
+        private readonly IAppRepository _carRepository;
+        private readonly IMapper<CarSm, Car> _carSmToCarMapper;
 
-        public class CreateCarHandler : IRequestHandler<CreateCarCommand, ICommandResult<Car>>
+        public async Task<ICommandResult<Car>> Handle(CreateCarCommand command, CancellationToken cancellationToken)
         {
-            public CreateCarHandler(ILogger<CreateCarHandler> logger,
-                IAppRepository carRepository,
-                IMapper<CarSm, Car> carSmToCarMapper)
-            {
-                _log = logger ?? throw new ArgumentNullException(nameof(logger));
-                _carRepository = carRepository ?? throw new ArgumentNullException(nameof(carRepository));
-                _carSmToCarMapper = carSmToCarMapper ?? throw new ArgumentNullException(nameof(carSmToCarMapper));
-            }
+            CarSm carSm = command.CarSm;
 
-            private readonly ILogger<CreateCarHandler> _log;
-            private readonly IAppRepository _carRepository;
-            private readonly IMapper<CarSm, Car> _carSmToCarMapper;
+            Car car = _carSmToCarMapper.Map(carSm);
+            car = await _carRepository.AddAsync(car, cancellationToken);
 
-            public async Task<ICommandResult<Car>> Handle(CreateCarCommand command, CancellationToken cancellationToken)
-            {
-                CarSm carSm = command.CarSm;
-
-                Car car = _carSmToCarMapper.Map(carSm);
-                car = await _carRepository.AddAsync(car, cancellationToken);
-
-                return new CommandResult<Car>(CommandStatus.Ok, car);
-            }
+            return new CommandResult<Car>(CommandStatus.Ok, car);
         }
     }
 }
