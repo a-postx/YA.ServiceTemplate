@@ -1,4 +1,5 @@
 using System.Globalization;
+using Delobytes.AspNetCore.Application;
 using Delobytes.Mapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -6,9 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Features.Cars.Queries;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.ViewModels;
 using YA.ServiceTemplate.Core.Entities;
 

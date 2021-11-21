@@ -114,8 +114,6 @@ public class Startup
             options.IdempotencyHeader = idempotencyOptions.IdempotencyHeader;
         });
 
-        services.AddCustomProblemDetails();
-
         services.AddHttpClient();
         services.AddMediatR(GetType().Assembly);
 

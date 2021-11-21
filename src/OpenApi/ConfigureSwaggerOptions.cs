@@ -42,7 +42,6 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         }
 
         options.OperationFilter<ContentTypeOperationFilter>();
-        options.OperationFilter<ProblemDetailsOperationFilter>();
         // Show an example model for JsonPatchDocument<T>.
         options.SchemaFilter<JsonPatchDocumentSchemaFilter>();
 

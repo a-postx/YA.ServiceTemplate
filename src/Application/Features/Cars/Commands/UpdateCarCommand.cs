@@ -1,3 +1,5 @@
+using Delobytes.AspNetCore.Application;
+using Delobytes.AspNetCore.Application.Commands;
 using Delobytes.Mapper;
 using FluentValidation.Results;
 using MediatR;
@@ -59,7 +61,7 @@ public class UpdateCarCommand : IRequest<ICommandResult<Car>>
 
             if (!validationResult.IsValid)
             {
-                return new CommandResult<Car>(CommandStatus.ModelInvalid, null, validationResult);
+                return new CommandResult<Car>(CommandStatus.ModelInvalid, null, validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
             }
 
             _carSmToCarMapper.Map(carSm, car);

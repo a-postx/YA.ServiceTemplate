@@ -1,11 +1,11 @@
+using Delobytes.AspNetCore.Application;
+using Delobytes.AspNetCore.Application.Commands;
 using MediatR;
-using YA.ServiceTemplate.Application.Enums;
-using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Core.Entities;
 
 namespace YA.ServiceTemplate.Application.Features.Cars.Commands;
 
-public class DeleteCarCommand : IRequest<ICommandResult<Empty>>
+public class DeleteCarCommand : IRequest<ICommandResult>
 {
     public DeleteCarCommand(int id)
     {
@@ -14,7 +14,7 @@ public class DeleteCarCommand : IRequest<ICommandResult<Empty>>
 
     public int Id { get; protected set; }
 
-    public class DeleteCarHandler : IRequestHandler<DeleteCarCommand, ICommandResult<Empty>>
+    public class DeleteCarHandler : IRequestHandler<DeleteCarCommand, ICommandResult>
     {
         public DeleteCarHandler(ILogger<DeleteCarHandler> logger, IAppRepository carRepository)
         {
@@ -25,7 +25,7 @@ public class DeleteCarCommand : IRequest<ICommandResult<Empty>>
         private readonly ILogger<DeleteCarHandler> _log;
         private readonly IAppRepository _carRepository;
 
-        public async Task<ICommandResult<Empty>> Handle(DeleteCarCommand command, CancellationToken cancellationToken)
+        public async Task<ICommandResult> Handle(DeleteCarCommand command, CancellationToken cancellationToken)
         {
             int carId = command.Id;
 
@@ -33,12 +33,12 @@ public class DeleteCarCommand : IRequest<ICommandResult<Empty>>
 
             if (car == null)
             {
-                return new CommandResult<Empty>(CommandStatus.NotFound, null);
+                return new CommandResult(CommandStatus.NotFound);
             }
 
             await _carRepository.DeleteAsync(car, cancellationToken);
 
-            return new CommandResult<Empty>(CommandStatus.Ok, null);
+            return new CommandResult(CommandStatus.Ok);
         }
     }
 }

@@ -1,10 +1,8 @@
+using Delobytes.AspNetCore.Application;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using YA.ServiceTemplate.Application.Enums;
-using YA.ServiceTemplate.Application.Features;
 using YA.ServiceTemplate.Application.Features.Cars.Commands;
-using YA.ServiceTemplate.Application.Interfaces;
 
 namespace YA.ServiceTemplate.Application.ActionHandlers.Cars;
 
@@ -25,7 +23,7 @@ public class DeleteCarAh : IDeleteCarAh
 
     public async Task<IActionResult> ExecuteAsync(int carId, CancellationToken cancellationToken)
     {
-        ICommandResult<Empty> result = await _mediator
+        ICommandResult result = await _mediator
             .Send(new DeleteCarCommand(carId), cancellationToken);
 
         switch (result.Status)

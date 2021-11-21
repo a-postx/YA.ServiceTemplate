@@ -1,3 +1,4 @@
+using Delobytes.AspNetCore.Application;
 using MassTransit;
 using MbEvents;
 using MediatR;

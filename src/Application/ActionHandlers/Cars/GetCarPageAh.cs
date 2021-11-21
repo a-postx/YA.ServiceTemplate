@@ -1,9 +1,9 @@
 using Delobytes.AspNetCore;
+using Delobytes.AspNetCore.Application;
 using Delobytes.Mapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using YA.ServiceTemplate.Application.Enums;
 using YA.ServiceTemplate.Application.Features.Cars.Queries;
 using YA.ServiceTemplate.Application.Interfaces;
 using YA.ServiceTemplate.Application.Models.HttpQueryParams;

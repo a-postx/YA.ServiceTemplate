@@ -70,7 +70,6 @@ public class CarsController : ControllerBase
     [HttpDelete("{carId}", Name = RouteNames.DeleteCar)]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Car with the specified unique identifier was deleted.")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Car with the specified unique identifier was not found.")]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
     public Task<IActionResult> DeleteAsync(
         [FromServices] IDeleteCarAh handler,
         int carId,
@@ -92,8 +91,7 @@ public class CarsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Car with the specified unique identifier.", typeof(CarVm))]
     [SwaggerResponse(StatusCodes.Status304NotModified, "The car has not changed since the date given in the If-Modified-Since HTTP header.")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Car with the specified unique identifier could not be found.")]
-    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.")]
     public Task<IActionResult> GetAsync(
         [FromServices] IGetCarAh handler,
         int carId,
@@ -114,10 +112,9 @@ public class CarsController : ControllerBase
     [HttpGet("", Name = RouteNames.GetCarPage)]
     [HttpHead("", Name = RouteNames.HeadCarPage)]
     [SwaggerResponse(StatusCodes.Status200OK, "Collection of cars for the specified page.", typeof(PaginatedResultVm<CarVm>))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Page request parameters are invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Page with the specified page number was not found.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Page request parameters are invalid.")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Page with the specified page number was not found.")]
+    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.")]
     public Task<IActionResult> GetPageAsync(
         [FromServices] IGetCarPageAh handler,
         [FromQuery] PageOptionsCursor pageOptions,
@@ -138,11 +135,10 @@ public class CarsController : ControllerBase
     [HttpPatch("{carId}", Name = RouteNames.PatchCar)]
     [ServiceFilter(typeof(IdempotencyFilterAttribute))]
     [SwaggerResponse(StatusCodes.Status200OK, "Patched car with the specified unique identifier.", typeof(CarVm))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Patch document is invalid.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Patch document is invalid.")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Car with the specified unique identifier could not be found.")]
-    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.")]
+    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.")]
     public Task<IActionResult> PatchAsync(
         [FromServices] IPatchCarAh handler,
         int carId,
@@ -163,10 +159,9 @@ public class CarsController : ControllerBase
     [HttpPost("", Name = RouteNames.PostCar)]
     [ServiceFilter(typeof(IdempotencyFilterAttribute))]
     [SwaggerResponse(StatusCodes.Status201Created, "Car was created.", typeof(CarVm))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Request is invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Request is invalid.")]
+    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.")]
+    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.")]
     public Task<IActionResult> PostAsync(
         [FromServices] IPostCarAh handler,
         [FromBody] CarSm car,
@@ -186,11 +181,10 @@ public class CarsController : ControllerBase
     /// 404 Not Found if a car with the specified unique identifier was not found.</returns>
     [HttpPut("{carId}", Name = RouteNames.PutCar)]
     [SwaggerResponse(StatusCodes.Status200OK, "Car was updated.", typeof(CarVm))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Request is invalid.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Request is invalid.")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "A car with the specified unique identifier could not be found.")]
-    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status409Conflict, "Duplicate request.", typeof(ProblemDetails))]
-    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.", typeof(ProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status406NotAcceptable, "The MIME type in the Accept HTTP header is not acceptable.")]
+    [SwaggerResponse(StatusCodes.Status415UnsupportedMediaType, "The MIME type in the Content-Type HTTP header is unsupported.")]
     public Task<IActionResult> PutAsync(
         [FromServices] IPutCarAh handler,
         int carId,

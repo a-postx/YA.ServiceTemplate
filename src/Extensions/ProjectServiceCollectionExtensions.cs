@@ -69,16 +69,4 @@ public static class ProjectServiceCollectionExtensions
             .AddScoped<IPaginatedResultFactory, PaginatedResultFactory>()
             .AddScoped<IMessageBus, MessageBus>();
     }
-
-    /// <summary>
-    /// Добавляет кастомизированную фабрику Деталей Проблемы.
-    /// </summary>
-    public static IServiceCollection AddCustomProblemDetails(this IServiceCollection services)
-    {
-        services
-            .AddTransient<IProblemDetailsFactory, YaProblemDetailsFactory>()
-            .AddTransient<ProblemDetailsFactory, YaProblemDetailsFactory>();
-
-        return services;
-    }
 }

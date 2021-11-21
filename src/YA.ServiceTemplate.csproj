@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
     <Authors>Alexey Yakubin</Authors>
     <Company>Delobytes</Company>
     <Product>YA.ServiceTemplate</Product>
@@ -35,9 +35,9 @@
     <PackageReference Include="AspNetCore.HealthChecks.Prometheus.Metrics" Version="5.0.1" />
     <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
     <PackageReference Include="CorrelationId" Version="3.0.1" />
-    <PackageReference Include="Delobytes.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="Delobytes.AspNetCore.Idempotency" Version="1.0.0" />
-    <PackageReference Include="Delobytes.AspNetCore.Logging" Version="1.0.1" />
+    <PackageReference Include="Delobytes.AspNetCore" Version="5.1.0" />
+    <PackageReference Include="Delobytes.AspNetCore.Idempotency" Version="2.0.0" />
+    <PackageReference Include="Delobytes.AspNetCore.Logging" Version="2.0.0" />
     <PackageReference Include="Delobytes.AspNetCore.Swagger" Version="6.0.0" />
     <PackageReference Include="Delobytes.Mapper" Version="1.1.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
